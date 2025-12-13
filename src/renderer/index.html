@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://crafatar.com https://*.crafatar.com;">
+    <title>YoNiX Launcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+    <!-- Custom Titlebar -->
+    <div class="titlebar">
+        <div class="titlebar-drag">
+            <span class="titlebar-title">YoNiX Launcher</span>
+        </div>
+        <div class="titlebar-controls">
+            <button class="titlebar-btn" id="btn-minimize">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                    <rect x="1" y="5" width="10" height="2" fill="currentColor" />
+                </svg>
+            </button>
+            <button class="titlebar-btn" id="btn-maximize">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                    <rect x="1" y="1" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+            </button>
+            <button class="titlebar-btn titlebar-btn-close" id="btn-close">
+                <svg width="12" height="12" viewBox="0 0 12 12">
+                    <path d="M1 1L11 11M11 1L1 11" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Login View -->
+    <div class="view" id="view-login">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <div class="logo-icon">Y</div>
+                    <h1>YoNiX Launcher</h1>
+                    <p>Fabric 1.21.1 Modpack</p>
+                </div>
+
+                <!-- Auth Mode Toggle -->
+                <div class="auth-toggle">
+                    <button class="auth-toggle-btn active" data-mode="microsoft">
+                        <svg width="20" height="20" viewBox="0 0 21 21" fill="currentColor">
+                            <path d="M0 0h10v10H0zM11 0h10v10H11zM0 11h10v10H0zM11 11h10v10H11z" />
+                        </svg>
+                        Microsoft
+                    </button>
+                    <button class="auth-toggle-btn" data-mode="offline">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                        </svg>
+                        Hors-ligne
+                    </button>
+                </div>
+
+                <!-- Microsoft Login -->
+                <div class="auth-form" id="form-microsoft">
+                    <p class="auth-info">Connectez-vous avec votre compte Microsoft pour accéder à Minecraft.</p>
+                    <button class="btn btn-primary btn-microsoft" id="btn-login-microsoft">
+                        <svg width="20" height="20" viewBox="0 0 21 21" fill="currentColor">
+                            <path d="M0 0h10v10H0zM11 0h10v10H11zM0 11h10v10H0zM11 11h10v10H11z" />
+                        </svg>
+                        Se connecter avec Microsoft
+                    </button>
+                </div>
+
+                <!-- Offline Login -->
+                <div class="auth-form hidden" id="form-offline">
+                    <p class="auth-info">Entrez votre pseudo pour jouer en mode hors-ligne.</p>
+                    <div class="input-group">
+                        <input type="text" id="input-username" placeholder="Pseudo" maxlength="16"
+                            pattern="[a-zA-Z0-9_]+">
+                        <span class="input-hint">3-16 caractères, lettres et chiffres uniquement</span>
+                    </div>
+                    <button class="btn btn-primary btn-offline" id="btn-login-offline" disabled>
+                        Jouer en Hors-ligne
+                    </button>
+                </div>
+
+                <div class="login-status hidden" id="login-status">
+                    <div class="spinner"></div>
+                    <span id="login-status-text">Connexion en cours...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main View -->
+    <div class="view hidden" id="view-main">
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="profile-card">
+                    <div class="profile-avatar" id="profile-avatar">
+                        <img src="" alt="Avatar" id="profile-avatar-img">
+                        <div class="profile-avatar-placeholder">?</div>
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-name" id="profile-name">Player</span>
+                        <span class="profile-type" id="profile-type">Hors-ligne</span>
+                    </div>
+                    <button class="btn-icon" id="btn-logout" title="Déconnexion">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <button class="nav-item active" data-tab="home">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        </svg>
+                        Accueil
+                    </button>
+                    <button class="nav-item" data-tab="mods">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                        </svg>
+                        Mods
+                    </button>
+                    <button class="nav-item" data-tab="settings">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                        Paramètres
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="content">
+                <!-- Home Tab -->
+                <div class="tab-content active" id="tab-home">
+                    <div class="home-hero">
+                        <div class="hero-bg"></div>
+                        <div class="hero-content">
+                            <h2>YoNiX Modpack</h2>
+                            <p>Fabric 1.21.1 • Mods optimisés</p>
+
+                            <div class="server-info">
+                                <div class="server-status">
+                                    <span class="status-dot"></span>
+                                    <span id="server-status-text">Serveur en ligne</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="launch-section">
+                        <div class="update-status" id="update-status">
+                            <div class="update-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="23 4 23 10 17 10" />
+                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                                </svg>
+                            </div>
+                            <div class="update-text">
+                                <span class="update-title">Vérification des mises à jour...</span>
+                                <span class="update-details" id="update-details"></span>
+                            </div>
+                        </div>
+
+                        <div class="progress-container hidden" id="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text">0%</span>
+                        </div>
+
+                        <button class="btn btn-launch" id="btn-launch">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                            JOUER
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mods Tab -->
+                <div class="tab-content hidden" id="tab-mods">
+                    <h2>Mods installés</h2>
+                    <div class="mods-grid" id="mods-list">
+                        <!-- Mods will be listed here -->
+                        <div class="mod-card">
+                            <div class="mod-icon">📦</div>
+                            <div class="mod-info">
+                                <span class="mod-name">Chargement...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-content hidden" id="tab-settings">
+                    <h2>Paramètres</h2>
+
+                    <div class="settings-section">
+                        <h3>Mémoire (RAM)</h3>
+                        <div class="setting-row">
+                            <label for="ram-slider">RAM allouée à Minecraft</label>
+                            <div class="ram-control">
+                                <input type="range" id="ram-slider" min="2" max="16" value="4" step="1">
+                                <span class="ram-value" id="ram-value">4 Go</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Répertoire du jeu</h3>
+                        <div class="setting-row">
+                            <span class="path-display" id="game-path">%APPDATA%\.yonix-launcher</span>
+                            <button class="btn btn-secondary" id="btn-open-folder">Ouvrir le dossier</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>À propos</h3>
+                        <div class="about-info">
+                            <p>YoNiX Launcher v1.0.0</p>
+                            <p>Minecraft 1.21.1 avec Fabric</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="scripts/app.js"></script>
+</body>
+
+</html>
