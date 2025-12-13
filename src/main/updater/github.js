@@ -62,7 +62,7 @@ class GitHubUpdater {
                 currentVersion: localVersion,
                 latestVersion: release.tag_name,
                 releaseNotes: release.body,
-                assets: assets
+                assets: { ...assets, latestVersion: release.tag_name }
             };
         } catch (error) {
             if (error.response?.statusCode === 404) {
@@ -164,7 +164,7 @@ class GitHubUpdater {
         // Save version info
         const versionFile = path.join(this.minecraftDir, 'version.json');
         fs.writeFileSync(versionFile, JSON.stringify({
-            version: assets.version || 'unknown',
+            version: assets.latestVersion || 'unknown',
             updatedAt: new Date().toISOString()
         }));
 
@@ -204,16 +204,11 @@ class GitHubUpdater {
             const AdmZip = require('adm-zip');
             const zip = new AdmZip(tempFile);
 
-            // Clear existing files in folder before extracting
-            const files = fs.readdirSync(targetDir);
-            for (const file of files) {
-                if (file !== asset.name && !file.endsWith('.tmp')) {
-                    fs.unlinkSync(path.join(targetDir, file));
-                }
-            }
-
+            // Extract zip contents (replace existing files)
+            console.log(`[GitHubUpdater] Extracting ${asset.name} to ${targetDir}`);
             zip.extractAllTo(targetDir, true);
             fs.unlinkSync(tempFile);
+            console.log(`[GitHubUpdater] Extracted ${asset.name} successfully`);
         } else {
             // Move temp file to final location
             if (fs.existsSync(finalFile)) {

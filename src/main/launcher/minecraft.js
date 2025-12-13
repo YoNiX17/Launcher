@@ -289,12 +289,54 @@ class MinecraftLauncher {
 
         // Download asset index
         const indexPath = path.join(indexDir, `${assetIndex.id}.json`);
+        let indexData;
+
         if (!fs.existsSync(indexPath)) {
-            const indexData = await got.get(assetIndex.url, { responseType: 'json' });
-            fs.writeFileSync(indexPath, JSON.stringify(indexData.body, null, 2));
+            const response = await got.get(assetIndex.url, { responseType: 'json' });
+            indexData = response.body;
+            fs.writeFileSync(indexPath, JSON.stringify(indexData, null, 2));
+        } else {
+            indexData = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
         }
 
-        // Assets are downloaded on-demand by Minecraft itself for newer versions
+        // Download asset objects
+        const objects = indexData.objects;
+        const totalAssets = Object.keys(objects).length;
+        let downloaded = 0;
+        let skipped = 0;
+
+        console.log(`[MinecraftLauncher] Downloading ${totalAssets} assets...`);
+
+        for (const [name, asset] of Object.entries(objects)) {
+            const hash = asset.hash;
+            const prefix = hash.substring(0, 2);
+            const assetPath = path.join(objectsDir, prefix, hash);
+
+            if (!fs.existsSync(assetPath)) {
+                fs.mkdirSync(path.join(objectsDir, prefix), { recursive: true });
+
+                const url = `https://resources.download.minecraft.net/${prefix}/${hash}`;
+
+                try {
+                    const response = await got.get(url, { responseType: 'buffer' });
+                    fs.writeFileSync(assetPath, response.body);
+                    downloaded++;
+
+                    // Update progress every 100 assets
+                    if (downloaded % 100 === 0) {
+                        const percent = Math.floor(48 + (downloaded / totalAssets) * 10);
+                        this.emitProgress(`Downloading assets... (${downloaded}/${totalAssets})`, percent);
+                        console.log(`[MinecraftLauncher] Assets: ${downloaded}/${totalAssets}`);
+                    }
+                } catch (error) {
+                    console.error(`[MinecraftLauncher] Failed to download asset: ${name}`, error.message);
+                }
+            } else {
+                skipped++;
+            }
+        }
+
+        console.log(`[MinecraftLauncher] Assets complete: ${downloaded} downloaded, ${skipped} already existed`);
     }
 
     checkRules(rules) {

@@ -255,17 +255,23 @@ class LauncherApp {
 
             if (result.success) {
                 if (result.updates.hasUpdates) {
-                    this.updateDetails.textContent = `Mise à jour disponible: ${result.updates.latestVersion}`;
+                    const assetsCount = result.updates.assets.mods.length +
+                        result.updates.assets.shaders.length +
+                        result.updates.assets.resourcepacks.length;
+                    this.updateDetails.textContent = `Mise à jour ${result.updates.latestVersion} disponible (${assetsCount} fichiers)`;
                     await this.downloadUpdates(result.updates.assets);
+                } else if (result.updates.error) {
+                    this.updateDetails.textContent = result.updates.error;
                 } else {
-                    this.updateDetails.textContent = 'Tout est à jour!';
+                    this.updateDetails.textContent = `Tout est à jour (${result.updates.currentVersion || 'v1.0.0'})`;
                     document.querySelector('.update-icon').classList.add('done');
                 }
             } else {
                 this.updateDetails.textContent = result.error || 'Impossible de vérifier les mises à jour';
             }
         } catch (error) {
-            this.updateDetails.textContent = 'Mode hors-ligne - Impossible de vérifier les mises à jour';
+            console.error('Update check error:', error);
+            this.updateDetails.textContent = 'Mode hors-ligne - Utilisation des fichiers locaux';
         }
 
         this.btnLaunch.disabled = false;
@@ -273,12 +279,14 @@ class LauncherApp {
 
     async downloadUpdates(assets) {
         this.progressContainer.classList.remove('hidden');
+        this.updateDetails.textContent = 'Téléchargement des mods...';
 
         try {
             const result = await window.launcher.downloadUpdates(assets);
 
             if (result.success) {
-                this.updateDetails.textContent = 'Mods mis à jour!';
+                this.updateDetails.textContent = `Mods mis à jour vers ${assets.latestVersion}!`;
+                document.querySelector('.update-icon').classList.add('done');
             } else {
                 this.updateDetails.textContent = `Erreur: ${result.error}`;
             }
