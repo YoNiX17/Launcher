@@ -11,6 +11,7 @@ class LauncherApp {
     constructor() {
         // Views
         this.viewLogin = document.getElementById('view-login');
+        this.viewProfiles = document.getElementById('view-profiles');
         this.viewMain = document.getElementById('view-main');
 
         // Auth elements
@@ -22,6 +23,10 @@ class LauncherApp {
         this.btnLoginOffline = document.getElementById('btn-login-offline');
         this.loginStatus = document.getElementById('login-status');
         this.loginStatusText = document.getElementById('login-status-text');
+
+        // Profile selection elements
+        this.profilesList = document.getElementById('profiles-list');
+        this.btnAddProfile = document.getElementById('btn-add-profile');
 
         // Main view elements
         this.profileName = document.getElementById('profile-name');
@@ -48,11 +53,12 @@ class LauncherApp {
         // State
         this.currentAuth = null;
         this.authMode = 'microsoft';
+        this.profiles = [];
     }
 
     async init() {
         this.setupEventListeners();
-        await this.checkStoredAuth();
+        await this.loadProfiles();
     }
 
     setupEventListeners() {
@@ -110,17 +116,118 @@ class LauncherApp {
         window.launcher.onLaunchProgress((progress) => {
             this.updateProgress(progress);
         });
+
+        // Add profile button
+        this.btnAddProfile.addEventListener('click', () => this.showLoginView());
     }
 
-    async checkStoredAuth() {
+    // ============ Profile Management ============
+
+    async loadProfiles() {
         try {
-            const stored = await window.launcher.getStoredAuth();
-            if (stored && stored.profile) {
-                this.currentAuth = stored;
+            this.profiles = await window.launcher.getAllProfiles();
+
+            if (this.profiles.length === 0) {
+                // No profiles, show login
+                this.showLoginView();
+            } else {
+                // Show profile selection
+                this.showProfilesView();
+            }
+        } catch (error) {
+            console.error('Error loading profiles:', error);
+            this.showLoginView();
+        }
+    }
+
+    showProfilesView() {
+        this.viewLogin.classList.add('hidden');
+        this.viewProfiles.classList.remove('hidden');
+        this.viewMain.classList.add('hidden');
+
+        this.renderProfiles();
+    }
+
+    renderProfiles() {
+        if (this.profiles.length === 0) {
+            this.profilesList.innerHTML = `
+                <div class="profiles-empty">
+                    <div class="profiles-empty-icon">👤</div>
+                    <p>Aucun profil enregistré</p>
+                </div>
+            `;
+            return;
+        }
+
+        this.profilesList.innerHTML = this.profiles.map(p => {
+            const profile = p.profile;
+            const isOffline = p.type === 'offline';
+            const avatarContent = isOffline
+                ? `<div class="profile-item-avatar" style="background: ${this.generateAvatarColor(profile.username)}">${profile.username.charAt(0).toUpperCase()}</div>`
+                : `<div class="profile-item-avatar"><img src="https://crafatar.com/avatars/${profile.uuid}?size=48&overlay" alt=""></div>`;
+
+            return `
+                <div class="profile-item" data-uuid="${profile.uuid}">
+                    ${avatarContent}
+                    <div class="profile-item-info">
+                        <span class="profile-item-name">${profile.username}</span>
+                        <span class="profile-item-type">${isOffline ? 'Hors-ligne' : 'Microsoft'}</span>
+                    </div>
+                    <button class="profile-item-delete" data-uuid="${profile.uuid}" title="Supprimer">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        // Add click handlers
+        this.profilesList.querySelectorAll('.profile-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (!e.target.closest('.profile-item-delete')) {
+                    this.selectProfile(item.dataset.uuid);
+                }
+            });
+        });
+
+        // Add delete handlers
+        this.profilesList.querySelectorAll('.profile-item-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteProfile(btn.dataset.uuid);
+            });
+        });
+    }
+
+    async selectProfile(uuid) {
+        try {
+            await window.launcher.selectProfile(uuid);
+            const selected = this.profiles.find(p => p.profile.uuid === uuid);
+            if (selected) {
+                this.currentAuth = selected;
                 this.showMainView();
             }
         } catch (error) {
-            console.error('Error checking stored auth:', error);
+            console.error('Error selecting profile:', error);
+        }
+    }
+
+    async deleteProfile(uuid) {
+        if (!confirm('Supprimer ce profil ?')) return;
+
+        try {
+            const result = await window.launcher.deleteProfile(uuid);
+            this.profiles = result.profiles;
+
+            if (this.profiles.length === 0) {
+                this.showLoginView();
+            } else {
+                this.renderProfiles();
+            }
+        } catch (error) {
+            console.error('Error deleting profile:', error);
         }
     }
 
@@ -154,6 +261,8 @@ class LauncherApp {
             const result = await window.launcher.loginMicrosoft();
 
             if (result.success) {
+                // Reload profiles and go to main view
+                this.profiles = await window.launcher.getAllProfiles();
                 this.currentAuth = { type: 'microsoft', profile: result.profile };
                 this.showMainView();
             } else {
@@ -182,6 +291,8 @@ class LauncherApp {
             const result = await window.launcher.loginOffline(username);
 
             if (result.success) {
+                // Reload profiles and go to main view
+                this.profiles = await window.launcher.getAllProfiles();
                 this.currentAuth = { type: 'offline', profile: result.profile };
                 this.showMainView();
             } else {
@@ -199,11 +310,17 @@ class LauncherApp {
     async logout() {
         await window.launcher.logout();
         this.currentAuth = null;
-        this.showLoginView();
+        // Return to profile selection instead of login
+        if (this.profiles.length > 0) {
+            this.showProfilesView();
+        } else {
+            this.showLoginView();
+        }
     }
 
     showLoginView() {
         this.viewLogin.classList.remove('hidden');
+        this.viewProfiles.classList.add('hidden');
         this.viewMain.classList.add('hidden');
         this.hideLoginStatus();
         this.inputUsername.value = '';
@@ -212,6 +329,7 @@ class LauncherApp {
 
     showMainView() {
         this.viewLogin.classList.add('hidden');
+        this.viewProfiles.classList.add('hidden');
         this.viewMain.classList.remove('hidden');
 
         // Update profile display

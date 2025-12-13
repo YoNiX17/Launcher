@@ -13,6 +13,12 @@ contextBridge.exposeInMainWorld('launcher', {
     getStoredAuth: () => ipcRenderer.invoke('auth:get-stored'),
     logout: () => ipcRenderer.invoke('auth:logout'),
 
+    // Profile Management
+    getAllProfiles: () => ipcRenderer.invoke('profiles:get-all'),
+    getSelectedProfile: () => ipcRenderer.invoke('profiles:get-selected'),
+    selectProfile: (uuid) => ipcRenderer.invoke('profiles:select', uuid),
+    deleteProfile: (uuid) => ipcRenderer.invoke('profiles:delete', uuid),
+
     // Updates
     checkUpdates: () => ipcRenderer.invoke('updater:check'),
     downloadUpdates: (assets) => ipcRenderer.invoke('updater:download', assets),

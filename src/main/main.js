@@ -68,12 +68,27 @@ ipcMain.handle('window:maximize', () => {
 });
 ipcMain.handle('window:close', () => mainWindow.close());
 
-// Authentication
+// Authentication - Multi-profile support
 ipcMain.handle('auth:microsoft', async () => {
     try {
         const auth = new MicrosoftAuth();
         const profile = await auth.login();
-        store.set('auth', { type: 'microsoft', profile });
+
+        // Add to profiles list
+        const profiles = store.get('profiles', []);
+        const existingIndex = profiles.findIndex(p => p.profile.uuid === profile.uuid);
+
+        const profileData = { type: 'microsoft', profile, addedAt: Date.now() };
+
+        if (existingIndex >= 0) {
+            profiles[existingIndex] = profileData;
+        } else {
+            profiles.push(profileData);
+        }
+
+        store.set('profiles', profiles);
+        store.set('selectedProfile', profile.uuid);
+
         return { success: true, profile };
     } catch (error) {
         return { success: false, error: error.message };
@@ -84,19 +99,79 @@ ipcMain.handle('auth:offline', async (event, username) => {
     try {
         const auth = new OfflineAuth();
         const profile = auth.login(username);
-        store.set('auth', { type: 'offline', profile });
+
+        // Add to profiles list
+        const profiles = store.get('profiles', []);
+        const existingIndex = profiles.findIndex(p => p.profile.uuid === profile.uuid);
+
+        const profileData = { type: 'offline', profile, addedAt: Date.now() };
+
+        if (existingIndex >= 0) {
+            profiles[existingIndex] = profileData;
+        } else {
+            profiles.push(profileData);
+        }
+
+        store.set('profiles', profiles);
+        store.set('selectedProfile', profile.uuid);
+
         return { success: true, profile };
     } catch (error) {
         return { success: false, error: error.message };
     }
 });
 
+// Get all profiles
+ipcMain.handle('profiles:get-all', () => {
+    return store.get('profiles', []);
+});
+
+// Get selected profile
+ipcMain.handle('profiles:get-selected', () => {
+    const profiles = store.get('profiles', []);
+    const selectedUuid = store.get('selectedProfile', null);
+
+    if (!selectedUuid || profiles.length === 0) {
+        return null;
+    }
+
+    return profiles.find(p => p.profile.uuid === selectedUuid) || null;
+});
+
+// Select a profile
+ipcMain.handle('profiles:select', (event, uuid) => {
+    store.set('selectedProfile', uuid);
+    return { success: true };
+});
+
+// Delete a profile
+ipcMain.handle('profiles:delete', (event, uuid) => {
+    const profiles = store.get('profiles', []);
+    const filtered = profiles.filter(p => p.profile.uuid !== uuid);
+    store.set('profiles', filtered);
+
+    // If deleted profile was selected, clear selection
+    if (store.get('selectedProfile') === uuid) {
+        store.delete('selectedProfile');
+    }
+
+    return { success: true, profiles: filtered };
+});
+
+// Legacy support - get stored auth (returns selected profile)
 ipcMain.handle('auth:get-stored', () => {
-    return store.get('auth', null);
+    const profiles = store.get('profiles', []);
+    const selectedUuid = store.get('selectedProfile', null);
+
+    if (!selectedUuid || profiles.length === 0) {
+        return null;
+    }
+
+    return profiles.find(p => p.profile.uuid === selectedUuid) || null;
 });
 
 ipcMain.handle('auth:logout', () => {
-    store.delete('auth');
+    store.delete('selectedProfile');
     return { success: true };
 });
 
@@ -114,12 +189,12 @@ ipcMain.handle('updater:check', async () => {
 ipcMain.handle('updater:download', async (event, assets) => {
     try {
         const updater = new GitHubUpdater(GITHUB_REPO);
-        
+
         // Progress callback
         updater.onProgress((progress) => {
             mainWindow.webContents.send('updater:progress', progress);
         });
-        
+
         await updater.downloadAssets(assets);
         return { success: true };
     } catch (error) {
@@ -134,14 +209,14 @@ ipcMain.handle('minecraft:launch', async () => {
         if (!authData) {
             throw new Error('Not authenticated');
         }
-        
+
         const launcher = new MinecraftLauncher();
-        
+
         // Progress callback
         launcher.onProgress((progress) => {
             mainWindow.webContents.send('minecraft:progress', progress);
         });
-        
+
         await launcher.launch(authData.profile);
         return { success: true };
     } catch (error) {

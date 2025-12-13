@@ -362,6 +362,189 @@ body {
 }
 
 /* ============================================
+   Profile Selection View
+   ============================================ */
+
+.profiles-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+.profiles-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 60% 40%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+    animation: aurora 25s ease-in-out infinite reverse;
+}
+
+.profiles-card {
+    position: relative;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius);
+    padding: 40px;
+    width: 480px;
+    max-height: 80vh;
+    box-shadow: var(--shadow-lg);
+    animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profiles-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.profiles-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.profiles-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.profiles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 24px;
+    padding-right: 8px;
+}
+
+.profile-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.profile-item:hover {
+    background: var(--bg-card);
+    border-color: var(--border-light);
+    transform: translateX(4px);
+}
+
+.profile-item.selected {
+    border-color: var(--accent-primary);
+    background: rgba(124, 58, 237, 0.15);
+}
+
+.profile-item-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+}
+
+.profile-item-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-item-name {
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-item-type {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.profile-item-delete {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    opacity: 0;
+}
+
+.profile-item:hover .profile-item-delete {
+    opacity: 1;
+}
+
+.profile-item-delete:hover {
+    background: var(--error);
+    color: white;
+}
+
+.profiles-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-add-profile {
+    width: 100%;
+    justify-content: center;
+}
+
+.profiles-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.profiles-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.profiles-empty p {
+    font-size: 14px;
+}
+
+/* ============================================
    Buttons
    ============================================ */
 
