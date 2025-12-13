@@ -98,6 +98,7 @@ class LauncherApp {
         this.ramSlider.addEventListener('input', () => {
             const value = this.ramSlider.value;
             this.ramValue.textContent = `${value} Go`;
+            this.updateSliderFill();
             window.launcher.setRam(parseInt(value));
         });
 
@@ -222,8 +223,15 @@ class LauncherApp {
             // Set avatar
             if (profile.type === 'microsoft' && profile.uuid) {
                 this.profileAvatarImg.src = `https://crafatar.com/avatars/${profile.uuid}?size=80&overlay`;
+                this.profileAvatarImg.style.display = 'block';
             } else {
-                this.profileAvatarImg.src = '';
+                // Generate offline avatar with initials
+                this.profileAvatarImg.style.display = 'none';
+                const placeholder = document.querySelector('.profile-avatar-placeholder');
+                if (placeholder) {
+                    placeholder.textContent = profile.username.charAt(0).toUpperCase();
+                    placeholder.style.background = this.generateAvatarColor(profile.username);
+                }
             }
         }
 
@@ -349,8 +357,27 @@ class LauncherApp {
             const ram = await window.launcher.getRam();
             this.ramSlider.value = ram;
             this.ramValue.textContent = `${ram} Go`;
+            this.updateSliderFill();
         } catch (error) {
             console.error('Error loading settings:', error);
         }
+    }
+
+    generateAvatarColor(username) {
+        // Generate a consistent color based on username
+        let hash = 0;
+        for (let i = 0; i < username.length; i++) {
+            hash = username.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = Math.abs(hash) % 360;
+        return `linear-gradient(135deg, hsl(${hue}, 70%, 50%) 0%, hsl(${(hue + 30) % 360}, 60%, 40%) 100%)`;
+    }
+
+    updateSliderFill() {
+        const min = parseInt(this.ramSlider.min);
+        const max = parseInt(this.ramSlider.max);
+        const val = parseInt(this.ramSlider.value);
+        const percent = ((val - min) / (max - min)) * 100;
+        this.ramSlider.style.setProperty('--value', `${percent}%`);
     }
 }

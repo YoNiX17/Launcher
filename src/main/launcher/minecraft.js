@@ -10,7 +10,7 @@ const store = new Store();
 
 // Minecraft/Fabric versions
 const MC_VERSION = '1.21.1';
-const FABRIC_LOADER_VERSION = '0.16.9';
+const FABRIC_LOADER_VERSION = '0.17.0';
 
 // URLs
 const VERSION_MANIFEST_URL = 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json';
