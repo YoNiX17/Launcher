@@ -46,11 +46,7 @@
       "allowElevation": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "PiErOW Launcher",
-      "installerLanguages": [
-        "fr"
-      ],
-      "language": "1036"
+      "shortcutName": "PiErOW Launcher"
     },
     "files": [
       "src/**/*",
