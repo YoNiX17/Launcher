@@ -1,15 +1,19 @@
 {
-  "name": "yonix-launcher",
+  "name": "pierow-launcher",
   "version": "1.0.0",
-  "description": "Minecraft Modpack Launcher for Fabric 1.21.1",
+  "description": "Red Empire Modpack Launcher for Minecraft Fabric 1.21.1",
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
     "build": "electron-builder",
-    "build:win": "electron-builder --win"
+    "build:win": "electron-builder --win",
+    "publish": "electron-builder --win --publish always",
+    "release:patch": "npm version patch && npm run publish",
+    "release:minor": "npm version minor && npm run publish",
+    "release:major": "npm version major && npm run publish"
   },
-  "author": "YoNiX",
+  "author": "PiErOW",
   "license": "MIT",
   "devDependencies": {
     "electron": "^28.0.0",
@@ -17,27 +21,54 @@
   },
   "dependencies": {
     "@azure/msal-node": "^2.6.0",
+    "adm-zip": "^0.5.10",
     "electron-store": "^8.1.0",
+    "electron-updater": "^6.6.2",
     "got": "^11.8.6",
-    "adm-zip": "^0.5.10"
+    "skin3d": "^0.0.12"
   },
   "build": {
-    "appId": "com.yonix.launcher",
-    "productName": "YoNiX Launcher",
+    "appId": "com.pierow.launcher",
+    "productName": "PiErOW Launcher",
+    "copyright": "Copyright © 2024 PiErOW",
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "build/icon.png",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PiErOW Launcher",
+      "installerLanguages": [
+        "fr"
+      ],
+      "language": "1036"
     },
     "files": [
       "src/**/*",
-      "assets/**/*"
-    ]
+      "assets/**/*",
+      "modpack.json",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "build/install-music.webm",
+        "to": "install-music.webm"
+      }
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "YoNiX17",
+      "repo": "Launcher",
+      "releaseType": "release"
+    }
   }
 }

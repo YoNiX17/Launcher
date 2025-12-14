@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https: http:;">
+    <title>Red Empire Modpack - Liste des Mods</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles/mods-showcase.css">
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-gradient"></div>
+        <div class="bg-particles"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <a href="#" onclick="history.back(); return false;" class="back-btn" title="Retour au launcher">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                    </a>
+                    <div class="logo">
+                        <div class="logo-icon">R</div>
+                        <div class="logo-text">
+                            <h1>Red Empire Modpack</h1>
+                            <span class="version-badge">Fabric 1.21.1</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-card">
+                        <span class="stat-number" id="total-mods">93</span>
+                        <span class="stat-label">Mods</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number" id="total-categories">9</span>
+                        <span class="stat-label">Catégories</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-wrapper">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                </svg>
+                <input type="text" id="search-input" placeholder="Rechercher un mod..." autocomplete="off">
+                <button class="search-clear hidden" id="search-clear">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="search-results hidden" id="search-results">
+                <span id="results-count">0 résultats</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Category Sidebar -->
+            <aside class="sidebar">
+                <nav class="category-nav">
+                    <h3>Catégories</h3>
+                    <button class="category-btn active" data-category="all">
+                        <span class="category-icon">📦</span>
+                        <span class="category-name">Tous les mods</span>
+                        <span class="category-count" id="count-all">93</span>
+                    </button>
+                    <div class="category-list" id="category-list">
+                        <!-- Categories will be populated by JavaScript -->
+                    </div>
+                </nav>
+
+                <!-- Quick Links -->
+                <div class="quick-links">
+                    <h3>Liens utiles</h3>
+                    <a href="https://modrinth.com" target="_blank" class="quick-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12.252.004a11.78 11.768 0 0 0-8.92 4.628 11.78 11.768 0 0 0-1.667 10.09 12 12 0 0 0 2.166 4.058l-.003.002.041.046c.065.065.13.13.198.193.016.016.032.033.05.049.011.01.023.023.035.032.106.104.213.206.321.306.01.011.022.02.033.031.022.02.044.041.067.062l.012.011a11.19 11.182 0 0 0 .671.548c.016.013.033.025.05.037.203.152.41.298.622.438l.007.004.002.002a11.3 11.293 0 0 0 .744.463l.075.04c.217.118.437.228.662.333.09.042.18.082.272.12.111.048.224.093.338.137.118.046.236.09.356.13.183.065.37.124.559.177.018.004.036.01.054.014.104.03.209.057.314.083l.262.06.069.015c.09.018.18.037.272.053a12.02 12.02 0 0 0 1.133.147l.07.005c.055.004.11.008.166.01a11.698 11.691 0 0 0 .8.027h.082c.194 0 .387-.006.58-.018a11.8 11.8 0 0 0 9.521-6.63 11.79 11.79 0 0 0-3.368-14.12 11.82 11.82 0 0 0-5.33-2.405 11.7 11.7 0 0 0-1.795-.146l-.124-.001Zm-.004 3.86a7.45 7.443 0 0 1 5.627 12.28l-3.08-2.36a4.04 4.04 0 0 0-.67-4.936 4.02 4.02 0 0 0-5.692 0 4.04 4.04 0 0 0-.67 4.935l-3.08 2.36a7.45 7.443 0 0 1 7.565-12.28Z" />
+                        </svg>
+                        Modrinth
+                    </a>
+                    <a href="https://www.curseforge.com/minecraft" target="_blank" class="quick-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M18.326 9.2h3.39l.003-.003h.302a1.2 1.2 0 0 1 1.2 1.2v.001a1.2 1.2 0 0 1-1.2 1.2h-.302l-.003-.003H18.75l-.001.003h-6.227l3.089 3.089a1.2 1.2 0 0 1 0 1.697v.001a1.2 1.2 0 0 1-1.697 0l-5.137-5.137-.001.001-.849-.849.001-.001-.213-.213.849-.849 5.35-5.35a1.2 1.2 0 0 1 1.697 0h.001a1.2 1.2 0 0 1 0 1.697L12.522 8.78l5.803-.001.001.421ZM1.22 12.2H.778a1.2 1.2 0 0 1-1.2-1.2v-.001a1.2 1.2 0 0 1 1.2-1.2h8.66l-.424-.424H4.822a1.2 1.2 0 0 1-1.2-1.2V8.17a1.2 1.2 0 0 1 1.2-1.2h5.615l-.001.001 1.849 1.849-.849.849v.001h-.001L6.298 14.81l-.001-.001-1.849-1.849.849-.849v-.001l.001-.001.213.213-.849.849.001.001-.001.001a1.2 1.2 0 0 1-1.697 0l-.001-.001a1.2 1.2 0 0 1 0-1.697l.255-.256.001-.001.001.001.001-.001L3.22 11.22h-2v.98Z" />
+                        </svg>
+                        CurseForge
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Mods Grid -->
+            <main class="mods-container">
+                <div class="mods-header">
+                    <h2 id="current-category">Tous les mods</h2>
+                    <span class="mods-count" id="mods-count">93 mods</span>
+                </div>
+                <div class="mods-grid" id="mods-grid">
+                    <!-- Mods will be populated by JavaScript -->
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state hidden" id="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                        <path d="M8 11h6" />
+                    </svg>
+                    <h3>Aucun mod trouvé</h3>
+                    <p>Essayez une autre recherche ou catégorie</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Mod Detail Modal -->
+    <div class="modal-overlay hidden" id="modal-overlay">
+        <div class="modal" id="mod-modal">
+            <button class="modal-close" id="modal-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <img class="modal-icon" id="modal-icon" src="" alt="">
+                    <div class="modal-title">
+                        <h2 id="modal-name">Mod Name</h2>
+                        <div class="modal-meta">
+                            <span class="modal-version" id="modal-version">v1.0.0</span>
+                            <span class="modal-category" id="modal-category">Category</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="modal-description" id="modal-description">Description du mod...</p>
+                <div class="modal-links">
+                    <a href="#" class="modal-link modrinth" id="modal-modrinth" target="_blank">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12.252.004a11.78 11.768 0 0 0-8.92 4.628 11.78 11.768 0 0 0-1.667 10.09 12 12 0 0 0 2.166 4.058l-.003.002.041.046c.065.065.13.13.198.193.016.016.032.033.05.049.011.01.023.023.035.032.106.104.213.206.321.306.01.011.022.02.033.031.022.02.044.041.067.062l.012.011a11.19 11.182 0 0 0 .671.548c.016.013.033.025.05.037.203.152.41.298.622.438l.007.004.002.002a11.3 11.293 0 0 0 .744.463l.075.04c.217.118.437.228.662.333.09.042.18.082.272.12.111.048.224.093.338.137.118.046.236.09.356.13.183.065.37.124.559.177.018.004.036.01.054.014.104.03.209.057.314.083l.262.06.069.015c.09.018.18.037.272.053a12.02 12.02 0 0 0 1.133.147l.07.005c.055.004.11.008.166.01a11.698 11.691 0 0 0 .8.027h.082c.194 0 .387-.006.58-.018a11.8 11.8 0 0 0 9.521-6.63 11.79 11.79 0 0 0-3.368-14.12 11.82 11.82 0 0 0-5.33-2.405 11.7 11.7 0 0 0-1.795-.146l-.124-.001Z" />
+                        </svg>
+                        Voir sur Modrinth
+                    </a>
+                    <a href="#" class="modal-link curseforge" id="modal-curseforge" target="_blank">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M18.326 9.2h3.39l.003-.003h.302a1.2 1.2 0 0 1 1.2 1.2v.001a1.2 1.2 0 0 1-1.2 1.2h-.302l-.003-.003H18.75l-.001.003h-6.227l3.089 3.089a1.2 1.2 0 0 1 0 1.697v.001a1.2 1.2 0 0 1-1.697 0l-5.137-5.137-.001.001-.849-.849.001-.001-.213-.213.849-.849 5.35-5.35a1.2 1.2 0 0 1 1.697 0h.001a1.2 1.2 0 0 1 0 1.697L12.522 8.78l5.803-.001.001.421Z" />
+                        </svg>
+                        Voir sur CurseForge
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/mods-data.js"></script>
+    <script src="scripts/mods-showcase.js"></script>
+</body>
+
+</html>

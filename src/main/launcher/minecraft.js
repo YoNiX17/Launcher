@@ -177,42 +177,46 @@ class MinecraftLauncher {
         const jarFile = path.join(versionsDir, `${MC_VERSION}.jar`);
         const jsonFile = path.join(versionsDir, `${MC_VERSION}.json`);
 
+        let versionData;
+
         if (fs.existsSync(jarFile) && fs.existsSync(jsonFile)) {
-            return;
+            // Load existing version data
+            versionData = JSON.parse(fs.readFileSync(jsonFile, 'utf8'));
+        } else {
+            fs.mkdirSync(versionsDir, { recursive: true });
+
+            // Get version manifest
+            this.emitProgress('Downloading Minecraft client...', 35);
+            const manifest = await got.get(VERSION_MANIFEST_URL, { responseType: 'json' });
+            const version = manifest.body.versions.find(v => v.id === MC_VERSION);
+
+            if (!version) {
+                throw new Error(`Minecraft version ${MC_VERSION} not found`);
+            }
+
+            // Get version details
+            const response = await got.get(version.url, { responseType: 'json' });
+            versionData = response.body;
+            fs.writeFileSync(jsonFile, JSON.stringify(versionData, null, 2));
+
+            // Download client jar
+            const clientUrl = versionData.downloads.client.url;
+            const downloadStream = got.stream(clientUrl);
+            const writeStream = fs.createWriteStream(jarFile);
+
+            await new Promise((resolve, reject) => {
+                downloadStream.pipe(writeStream);
+                downloadStream.on('error', reject);
+                writeStream.on('finish', resolve);
+            });
+
+            // Download libraries
+            this.emitProgress('Downloading libraries...', 45);
+            await this.downloadLibraries(versionData.libraries);
         }
 
-        fs.mkdirSync(versionsDir, { recursive: true });
-
-        // Get version manifest
-        this.emitProgress('Downloading Minecraft client...', 35);
-        const manifest = await got.get(VERSION_MANIFEST_URL, { responseType: 'json' });
-        const version = manifest.body.versions.find(v => v.id === MC_VERSION);
-
-        if (!version) {
-            throw new Error(`Minecraft version ${MC_VERSION} not found`);
-        }
-
-        // Get version details
-        const versionData = await got.get(version.url, { responseType: 'json' });
-        fs.writeFileSync(jsonFile, JSON.stringify(versionData.body, null, 2));
-
-        // Download client jar
-        const clientUrl = versionData.body.downloads.client.url;
-        const downloadStream = got.stream(clientUrl);
-        const writeStream = fs.createWriteStream(jarFile);
-
-        await new Promise((resolve, reject) => {
-            downloadStream.pipe(writeStream);
-            downloadStream.on('error', reject);
-            writeStream.on('finish', resolve);
-        });
-
-        // Download libraries
-        this.emitProgress('Downloading libraries...', 45);
-        await this.downloadLibraries(versionData.body.libraries);
-
-        // Download assets
-        await this.downloadAssets(versionData.body.assetIndex);
+        // ALWAYS ensure assets are complete (this was the bug - assets weren't checked if jar existed)
+        await this.downloadAssets(versionData.assetIndex);
     }
 
     async downloadLibraries(libraries) {
@@ -299,13 +303,9 @@ class MinecraftLauncher {
             indexData = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
         }
 
-        // Download asset objects
+        // Find missing assets
         const objects = indexData.objects;
-        const totalAssets = Object.keys(objects).length;
-        let downloaded = 0;
-        let skipped = 0;
-
-        console.log(`[MinecraftLauncher] Downloading ${totalAssets} assets...`);
+        const missingAssets = [];
 
         for (const [name, asset] of Object.entries(objects)) {
             const hash = asset.hash;
@@ -313,30 +313,49 @@ class MinecraftLauncher {
             const assetPath = path.join(objectsDir, prefix, hash);
 
             if (!fs.existsSync(assetPath)) {
-                fs.mkdirSync(path.join(objectsDir, prefix), { recursive: true });
-
-                const url = `https://resources.download.minecraft.net/${prefix}/${hash}`;
-
-                try {
-                    const response = await got.get(url, { responseType: 'buffer' });
-                    fs.writeFileSync(assetPath, response.body);
-                    downloaded++;
-
-                    // Update progress every 100 assets
-                    if (downloaded % 100 === 0) {
-                        const percent = Math.floor(48 + (downloaded / totalAssets) * 10);
-                        this.emitProgress(`Downloading assets... (${downloaded}/${totalAssets})`, percent);
-                        console.log(`[MinecraftLauncher] Assets: ${downloaded}/${totalAssets}`);
-                    }
-                } catch (error) {
-                    console.error(`[MinecraftLauncher] Failed to download asset: ${name}`, error.message);
-                }
-            } else {
-                skipped++;
+                missingAssets.push({ name, hash, prefix, assetPath });
             }
         }
 
-        console.log(`[MinecraftLauncher] Assets complete: ${downloaded} downloaded, ${skipped} already existed`);
+        const totalMissing = missingAssets.length;
+        if (totalMissing === 0) {
+            console.log(`[MinecraftLauncher] All ${Object.keys(objects).length} assets already downloaded`);
+            return;
+        }
+
+        console.log(`[MinecraftLauncher] Downloading ${totalMissing} missing assets (parallel)...`);
+
+        let downloaded = 0;
+        const BATCH_SIZE = 50; // Download 50 assets in parallel
+
+        // Process in batches
+        for (let i = 0; i < missingAssets.length; i += BATCH_SIZE) {
+            const batch = missingAssets.slice(i, i + BATCH_SIZE);
+
+            const promises = batch.map(async ({ name, hash, prefix, assetPath }) => {
+                fs.mkdirSync(path.join(objectsDir, prefix), { recursive: true });
+                const url = `https://resources.download.minecraft.net/${prefix}/${hash}`;
+
+                try {
+                    const response = await got.get(url, { responseType: 'buffer', timeout: { request: 10000 } });
+                    fs.writeFileSync(assetPath, response.body);
+                    return true;
+                } catch (error) {
+                    console.error(`[MinecraftLauncher] Failed: ${name}`, error.message);
+                    return false;
+                }
+            });
+
+            const results = await Promise.all(promises);
+            downloaded += results.filter(r => r).length;
+
+            // Update progress
+            const percent = Math.floor(48 + (downloaded / totalMissing) * 20);
+            this.emitProgress(`Downloading assets... (${downloaded}/${totalMissing})`, percent);
+            console.log(`[MinecraftLauncher] Assets: ${downloaded}/${totalMissing}`);
+        }
+
+        console.log(`[MinecraftLauncher] Assets complete: ${downloaded} downloaded`);
     }
 
     checkRules(rules) {

@@ -19,14 +19,33 @@ contextBridge.exposeInMainWorld('launcher', {
     selectProfile: (uuid) => ipcRenderer.invoke('profiles:select', uuid),
     deleteProfile: (uuid) => ipcRenderer.invoke('profiles:delete', uuid),
 
-    // Updates
+    // Updates (mods/modpack)
     checkUpdates: () => ipcRenderer.invoke('updater:check'),
     downloadUpdates: (assets) => ipcRenderer.invoke('updater:download', assets),
     onUpdateProgress: (callback) => ipcRenderer.on('updater:progress', (_, progress) => callback(progress)),
 
+    // Auto-Updater (launcher updates)
+    checkLauncherUpdate: () => ipcRenderer.invoke('update:check'),
+    installLauncherUpdate: () => ipcRenderer.invoke('update:install'),
+    getLauncherVersion: () => ipcRenderer.invoke('update:get-version'),
+    onLauncherUpdateAvailable: (callback) => ipcRenderer.on('update:available', (_, info) => callback(info)),
+    onLauncherUpdateProgress: (callback) => ipcRenderer.on('update:progress', (_, progress) => callback(progress)),
+    onLauncherUpdateDownloaded: (callback) => ipcRenderer.on('update:downloaded', (_, info) => callback(info)),
+
     // Minecraft
-    launch: () => ipcRenderer.invoke('minecraft:launch'),
+    launch: (options) => ipcRenderer.invoke('minecraft:launch', options),
     getRam: () => ipcRenderer.invoke('minecraft:get-ram'),
     setRam: (ram) => ipcRenderer.invoke('minecraft:set-ram', ram),
-    onLaunchProgress: (callback) => ipcRenderer.on('minecraft:progress', (_, progress) => callback(progress))
+    onLaunchProgress: (callback) => ipcRenderer.on('minecraft:progress', (_, progress) => callback(progress)),
+
+    // Avatar
+    selectAvatarFile: () => ipcRenderer.invoke('profile:select-avatar'),
+
+    // Skin
+    selectSkinFile: () => ipcRenderer.invoke('profile:select-skin'),
+
+    // Modpack
+    syncModpack: (modpackPath) => ipcRenderer.invoke('modpack:sync', modpackPath),
+    getInstalledMods: () => ipcRenderer.invoke('modpack:get-mods'),
+    onModpackProgress: (callback) => ipcRenderer.on('modpack:progress', (_, progress) => callback(progress))
 });

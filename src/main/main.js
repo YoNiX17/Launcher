@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const Store = require('electron-store');
 
 // Modules
@@ -7,6 +8,8 @@ const { MicrosoftAuth } = require('./auth/microsoft');
 const { OfflineAuth } = require('./auth/offline');
 const { GitHubUpdater } = require('./updater/github');
 const { MinecraftLauncher } = require('./launcher/minecraft');
+const { ModpackManager } = require('./launcher/modpack');
+const { autoUpdater } = require('electron-updater');
 
 // Config store
 const store = new Store();
@@ -41,7 +44,53 @@ function createWindow() {
     }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+    createWindow();
+
+    // Auto-updater setup (only in production)
+    if (!process.argv.includes('--dev')) {
+        // Configure auto-updater
+        autoUpdater.autoDownload = true;
+        autoUpdater.autoInstallOnAppQuit = true;
+
+        // Check for updates
+        autoUpdater.checkForUpdatesAndNotify();
+
+        // Update events
+        autoUpdater.on('checking-for-update', () => {
+            console.log('[AutoUpdater] Checking for updates...');
+        });
+
+        autoUpdater.on('update-available', (info) => {
+            console.log('[AutoUpdater] Update available:', info.version);
+            if (mainWindow) {
+                mainWindow.webContents.send('update:available', info);
+            }
+        });
+
+        autoUpdater.on('update-not-available', () => {
+            console.log('[AutoUpdater] No updates available');
+        });
+
+        autoUpdater.on('download-progress', (progress) => {
+            console.log(`[AutoUpdater] Download: ${Math.round(progress.percent)}%`);
+            if (mainWindow) {
+                mainWindow.webContents.send('update:progress', progress);
+            }
+        });
+
+        autoUpdater.on('update-downloaded', (info) => {
+            console.log('[AutoUpdater] Update downloaded:', info.version);
+            if (mainWindow) {
+                mainWindow.webContents.send('update:downloaded', info);
+            }
+        });
+
+        autoUpdater.on('error', (error) => {
+            console.error('[AutoUpdater] Error:', error.message);
+        });
+    }
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
@@ -67,6 +116,24 @@ ipcMain.handle('window:maximize', () => {
     }
 });
 ipcMain.handle('window:close', () => mainWindow.close());
+
+// Auto-updater controls
+ipcMain.handle('update:check', async () => {
+    try {
+        const result = await autoUpdater.checkForUpdates();
+        return { success: true, updateInfo: result?.updateInfo };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('update:install', () => {
+    autoUpdater.quitAndInstall(false, true);
+});
+
+ipcMain.handle('update:get-version', () => {
+    return app.getVersion();
+});
 
 // Authentication - Multi-profile support
 ipcMain.handle('auth:microsoft', async () => {
@@ -203,11 +270,75 @@ ipcMain.handle('updater:download', async (event, assets) => {
 });
 
 // Minecraft launcher
-ipcMain.handle('minecraft:launch', async () => {
+ipcMain.handle('minecraft:launch', async (event, options = {}) => {
     try {
-        const authData = store.get('auth');
-        if (!authData) {
-            throw new Error('Not authenticated');
+        let profile;
+
+        // Check for offline mode
+        if (options.offlineMode && options.offlineUsername) {
+            // Generate offline UUID from username (same algorithm as Minecraft)
+            const crypto = require('crypto');
+            const offlineUuidBytes = crypto.createHash('md5').update('OfflinePlayer:' + options.offlineUsername).digest();
+            // Set version 3 (name-based)
+            offlineUuidBytes[6] = (offlineUuidBytes[6] & 0x0f) | 0x30;
+            offlineUuidBytes[8] = (offlineUuidBytes[8] & 0x3f) | 0x80;
+            const offlineUuid = offlineUuidBytes.toString('hex').replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+
+            // Create offline profile
+            profile = {
+                uuid: offlineUuid,
+                username: options.offlineUsername,
+                accessToken: 'offline',
+                isOffline: true
+            };
+            console.log('[Launcher] Starting in offline mode as:', options.offlineUsername, 'UUID:', offlineUuid);
+        } else {
+            // Online mode - get selected profile
+            const profiles = store.get('profiles', []);
+            const selectedUuid = store.get('selectedProfile');
+
+            if (!profiles.length || !selectedUuid) {
+                throw new Error('Non connecté - Veuillez vous connecter');
+            }
+
+            // Profiles are stored as { type, profile, addedAt }
+            const profileEntry = profiles.find(p => p.profile && p.profile.uuid === selectedUuid);
+            if (!profileEntry || !profileEntry.profile) {
+                throw new Error('Profil non trouvé');
+            }
+
+            profile = profileEntry.profile;
+
+            console.log('[Launcher] Launching as:', profile.username);
+        }
+
+        // Sync mods before launch
+        const modpackManager = new ModpackManager();
+        const modpackPath = path.join(__dirname, '../../modpack.json');
+
+        if (require('fs').existsSync(modpackPath)) {
+            modpackManager.onProgress((progress) => {
+                mainWindow.webContents.send('modpack:progress', progress);
+            });
+
+            console.log('[Launcher] Syncing mods...');
+            await modpackManager.syncMods(modpackPath, { removeUnknown: false });
+        }
+
+        // Copy skin for CustomSkinLoader mod (LocalSkin feature)
+        const gameDir = path.join(app.getPath('appData'), '.yonix-launcher');
+
+        // Check if user has a saved skin
+        const savedSkinPath = store.get(`skins.${profile.uuid}`);
+        if (savedSkinPath && fs.existsSync(savedSkinPath)) {
+            // CustomSkinLoader loads local skins from: CustomSkinLoader/LocalSkin/skins/{USERNAME}.png
+            const localSkinDir = path.join(gameDir, 'CustomSkinLoader', 'LocalSkin', 'skins');
+            fs.mkdirSync(localSkinDir, { recursive: true });
+
+            // Copy skin with username as filename
+            const destPath = path.join(localSkinDir, `${profile.username}.png`);
+            fs.copyFileSync(savedSkinPath, destPath);
+            console.log('[Launcher] Copied skin for CustomSkinLoader:', destPath);
         }
 
         const launcher = new MinecraftLauncher();
@@ -217,7 +348,7 @@ ipcMain.handle('minecraft:launch', async () => {
             mainWindow.webContents.send('minecraft:progress', progress);
         });
 
-        await launcher.launch(authData.profile);
+        await launcher.launch(profile);
         return { success: true };
     } catch (error) {
         return { success: false, error: error.message };
@@ -231,4 +362,78 @@ ipcMain.handle('minecraft:get-ram', () => {
 ipcMain.handle('minecraft:set-ram', (event, ram) => {
     store.set('settings.ram', ram);
     return { success: true };
+});
+
+// Modpack management
+ipcMain.handle('modpack:sync', async (event, modpackPath) => {
+    try {
+        const modpackManager = new ModpackManager();
+
+        modpackManager.onProgress((progress) => {
+            mainWindow.webContents.send('modpack:progress', progress);
+        });
+
+        const defaultPath = modpackPath || path.join(__dirname, '../../modpack.json');
+        const result = await modpackManager.syncMods(defaultPath);
+        return { success: true, ...result };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('modpack:get-mods', () => {
+    const modpackManager = new ModpackManager();
+    return modpackManager.getInstalledMods();
+});
+
+// Avatar selection
+ipcMain.handle('profile:select-avatar', async () => {
+    const { dialog } = require('electron');
+    const result = await dialog.showOpenDialog(mainWindow, {
+        title: 'Choisir une photo de profil',
+        properties: ['openFile'],
+        filters: [
+            { name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif', 'webp'] }
+        ]
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+        return { success: false };
+    }
+
+    const filePath = result.filePaths[0];
+
+    // Store custom avatar path
+    const selectedUuid = store.get('selectedProfile');
+    if (selectedUuid) {
+        store.set(`avatars.${selectedUuid}`, filePath);
+    }
+
+    return { success: true, path: filePath };
+});
+
+// Skin selection
+ipcMain.handle('profile:select-skin', async () => {
+    const { dialog } = require('electron');
+    const result = await dialog.showOpenDialog(mainWindow, {
+        title: 'Choisir un skin Minecraft',
+        properties: ['openFile'],
+        filters: [
+            { name: 'Skin Minecraft', extensions: ['png'] }
+        ]
+    });
+
+    if (result.canceled || result.filePaths.length === 0) {
+        return { success: false };
+    }
+
+    const filePath = result.filePaths[0];
+
+    // Store custom skin path
+    const selectedUuid = store.get('selectedProfile');
+    if (selectedUuid) {
+        store.set(`skins.${selectedUuid}`, filePath);
+    }
+
+    return { success: true, path: filePath };
 });

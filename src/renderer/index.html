@@ -5,17 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://crafatar.com https://*.crafatar.com;">
-    <title>YoNiX Launcher</title>
+        content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://crafatar.com https://*.crafatar.com https://textures.minecraft.net https://visage.surgeplay.com https://mc-heads.net;">
+    <title>PiErOW Launcher</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles/main.css">
+    <!-- skinview3d for 3D skin rendering (loaded locally to avoid MIME type issues) -->
+    <script src="scripts/skinview3d.bundle.js"></script>
 </head>
 
 <body>
     <!-- Custom Titlebar -->
     <div class="titlebar">
         <div class="titlebar-drag">
-            <span class="titlebar-title">YoNiX Launcher</span>
+            <span class="titlebar-title">PiErOW Launcher</span>
         </div>
         <div class="titlebar-controls">
             <button class="titlebar-btn" id="btn-minimize">
@@ -41,9 +43,9 @@
         <div class="login-container">
             <div class="login-card">
                 <div class="login-logo">
-                    <div class="logo-icon">Y</div>
-                    <h1>YoNiX Launcher</h1>
-                    <p>Fabric 1.21.1 Modpack</p>
+                    <div class="logo-icon">P</div>
+                    <h1>PiErOW Launcher</h1>
+                    <p>Red Empire Modpack • Fabric 1.21.1</p>
                 </div>
 
                 <!-- Auth Mode Toggle -->
@@ -123,117 +125,339 @@
         </div>
     </div>
 
-    <!-- Main View -->
+    <!-- Main View - NEW MODERN DESIGN -->
     <div class="view hidden" id="view-main">
-        <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="profile-card">
-                    <div class="profile-avatar" id="profile-avatar">
-                        <img src="" alt="Avatar" id="profile-avatar-img">
-                        <div class="profile-avatar-placeholder">?</div>
+        <div class="launcher-container">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="top-left">
+                    <div class="logo-small">
+                        <span class="logo-text">PiErOW</span>
                     </div>
-                    <div class="profile-info">
-                        <span class="profile-name" id="profile-name">Player</span>
-                        <span class="profile-type" id="profile-type">Hors-ligne</span>
-                    </div>
-                    <button class="btn-icon" id="btn-logout" title="Déconnexion">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                            <polyline points="16 17 21 12 16 7" />
-                            <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                    </button>
                 </div>
-
-                <nav class="sidebar-nav">
-                    <button class="nav-item active" data-tab="home">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                <nav class="top-nav">
+                    <button class="top-nav-btn active" data-tab="home">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                         </svg>
                         Accueil
                     </button>
-                    <button class="nav-item" data-tab="mods">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    <button class="top-nav-btn" data-tab="mods">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <path
                                 d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                         </svg>
                         Mods
                     </button>
-                    <button class="nav-item" data-tab="settings">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    <button class="top-nav-btn" data-tab="settings">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
                             <circle cx="12" cy="12" r="3" />
                             <path
-                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                         </svg>
                         Paramètres
                     </button>
                 </nav>
-            </aside>
+                <div class="top-right">
+                    <div class="user-profile" id="user-profile">
+                        <div class="user-info">
+                            <span class="user-name" id="profile-name">Player</span>
+                            <span class="user-type" id="profile-type">Hors-ligne</span>
+                        </div>
+                        <div class="user-avatar-wrapper">
+                            <div class="user-avatar" id="profile-avatar">
+                                <img src="" alt="" id="profile-avatar-img">
+                                <span class="avatar-fallback">?</span>
+                            </div>
+                            <button class="btn-avatar-change" id="btn-change-avatar" title="Changer l'avatar">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                    <circle cx="12" cy="13" r="4" />
+                                </svg>
+                            </button>
+                        </div>
+                        <button class="btn-logout-small" id="btn-logout" title="Déconnexion">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-            <!-- Main Content -->
-            <main class="content">
+            <!-- Main Content Area -->
+            <main class="main-content">
                 <!-- Home Tab -->
                 <div class="tab-content active" id="tab-home">
-                    <div class="home-hero">
-                        <div class="hero-bg"></div>
-                        <div class="hero-content">
-                            <h2>YoNiX Modpack</h2>
-                            <p>Fabric 1.21.1 • Mods optimisés</p>
+                    <div class="home-layout">
+                        <!-- Left: Modpack Selection -->
+                        <div class="modpack-section">
+                            <h3 class="section-title">Sélectionner un Modpack</h3>
+                            <div class="modpack-grid">
+                                <!-- Red Empire Modpack -->
+                                <div class="modpack-card active" data-modpack="red-empire">
+                                    <div class="modpack-banner">
+                                        <div class="modpack-icon">🏰</div>
+                                    </div>
+                                    <div class="modpack-info">
+                                        <h4>Red Empire</h4>
+                                        <span class="modpack-meta">Fabric 1.21.1 • 93 mods</span>
+                                        <p class="modpack-desc">Aventure, exploration et nouveaux biomes</p>
+                                    </div>
+                                    <div class="modpack-badge">Actif</div>
+                                </div>
+                                <!-- Coming Soon -->
+                                <div class="modpack-card disabled" data-modpack="coming-soon">
+                                    <div class="modpack-banner">
+                                        <div class="modpack-icon">🔮</div>
+                                    </div>
+                                    <div class="modpack-info">
+                                        <h4>Bientôt...</h4>
+                                        <span class="modpack-meta">À venir</span>
+                                        <p class="modpack-desc">Nouveau modpack en préparation</p>
+                                    </div>
+                                    <div class="modpack-badge soon">Soon</div>
+                                </div>
+                            </div>
 
-                            <div class="server-info">
-                                <div class="server-status">
-                                    <span class="status-dot"></span>
-                                    <span id="server-status-text">Serveur en ligne</span>
+                            <!-- Recent Updates Section -->
+                            <div class="updates-section">
+                                <h3 class="section-title">Dernières mises à jour</h3>
+                                <div class="updates-list" id="updates-list">
+                                    <div class="update-item">
+                                        <span class="update-icon">📦</span>
+                                        <div class="update-content">
+                                            <span class="update-name">Terralith 2.5.8</span>
+                                            <span class="update-date">Nouveaux biomes ajoutés</span>
+                                        </div>
+                                    </div>
+                                    <div class="update-item">
+                                        <span class="update-icon">🏰</span>
+                                        <div class="update-content">
+                                            <span class="update-name">Dungeons Arise 2.1.0</span>
+                                            <span class="update-date">Nouvelles structures</span>
+                                        </div>
+                                    </div>
+                                    <div class="update-item">
+                                        <span class="update-icon">⚔️</span>
+                                        <div class="update-content">
+                                            <span class="update-name">Simply Swords 2.0</span>
+                                            <span class="update-date">Armes équilibrées</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="launch-section">
-                        <div class="update-status" id="update-status">
-                            <div class="update-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <polyline points="23 4 23 10 17 10" />
-                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                        <!-- Center: Launch Panel -->
+                        <div class="launch-panel">
+                            <div class="launch-header">
+                                <div class="selected-modpack">
+                                    <span class="modpack-label">Modpack sélectionné</span>
+                                    <h2 id="selected-modpack-name">Red Empire</h2>
+                                </div>
+                                <div class="server-status-badge" id="server-status">
+                                    <span class="status-indicator online"></span>
+                                    <span>En ligne</span>
+                                </div>
+                            </div>
+
+                            <!-- Console / Progress Log -->
+                            <div class="console-panel" id="console-panel">
+                                <div class="console-header">
+                                    <span class="console-title">Console</span>
+                                    <div class="console-stats">
+                                        <span id="download-stats"></span>
+                                    </div>
+                                </div>
+                                <div class="console-log" id="console-log">
+                                    <div class="console-line ready">
+                                        <span class="log-time">[00:00]</span>
+                                        <span class="log-text">Prêt à lancer...</span>
+                                    </div>
+                                </div>
+                                <div class="console-progress hidden" id="console-progress">
+                                    <div class="console-progress-bar">
+                                        <div class="console-progress-fill" id="console-progress-fill"></div>
+                                    </div>
+                                    <span class="console-progress-text" id="console-progress-text">0%</span>
+                                </div>
+                            </div>
+
+                            <!-- Launch Button -->
+                            <button class="btn-play" id="btn-launch">
+                                <div class="btn-play-bg"></div>
+                                <svg class="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
                                 </svg>
-                            </div>
-                            <div class="update-text">
-                                <span class="update-title">Vérification des mises à jour...</span>
-                                <span class="update-details" id="update-details"></span>
-                            </div>
+                                <span class="play-text">JOUER</span>
+                            </button>
                         </div>
 
-                        <div class="progress-container hidden" id="progress-container">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="progress-fill"></div>
+                        <!-- Right: 3D Skin Viewer -->
+                        <div class="skin-viewer-section">
+                            <h3 class="section-title">Votre personnage</h3>
+                            <div class="skin-viewer-container">
+                                <div id="skin-viewer-3d" class="skin-viewer-3d"></div>
+                                <div class="skin-viewer-controls">
+                                    <button class="viewer-control-btn active" id="btn-rotate-skin"
+                                        title="Rotation auto">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                                        </svg>
+                                    </button>
+                                    <button class="viewer-control-btn" id="btn-walk-anim" title="Animation marche">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="5" r="3" />
+                                            <path d="M12 8v8m-4 4l4-4 4 4M8 12l-2 2M16 12l2 2" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            <span class="progress-text" id="progress-text">0%</span>
-                        </div>
 
-                        <button class="btn btn-launch" id="btn-launch">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                                <polygon points="5 3 19 12 5 21 5 3" />
-                            </svg>
-                            JOUER
-                        </button>
+                            <!-- Skin Viewer Settings Panel -->
+                            <div class="skin-settings-panel">
+                                <div class="skin-setting-row">
+                                    <label>Zoom</label>
+                                    <input type="range" id="skin-zoom" min="0.3" max="2" step="0.1" value="0.9">
+                                    <span id="skin-zoom-value">0.9</span>
+                                </div>
+                                <div class="skin-setting-row">
+                                    <label>FOV</label>
+                                    <input type="range" id="skin-fov" min="30" max="120" step="5" value="50">
+                                    <span id="skin-fov-value">50°</span>
+                                </div>
+                                <div class="skin-setting-row">
+                                    <label>Vitesse rotation</label>
+                                    <input type="range" id="skin-speed" min="0.2" max="3" step="0.1" value="1">
+                                    <span id="skin-speed-value">1x</span>
+                                </div>
+                                <div class="skin-setting-row">
+                                    <label>Animation</label>
+                                    <select id="skin-animation">
+                                        <option value="idle">Idle (repos)</option>
+                                        <option value="walk">Marche</option>
+                                        <option value="run">Course</option>
+                                        <option value="none">Aucune</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="skin-info">
+                                <span class="skin-username" id="skin-username">Chargement...</span>
+                                <button class="btn-change-skin-small" id="btn-change-skin-viewer">
+                                    Changer le skin
+                                </button>
+                            </div>
+
+                            <!-- Skin Library -->
+                            <div class="skin-library">
+                                <div class="skin-library-header">
+                                    <span>Mes skins sauvegardés</span>
+                                    <button class="btn-add-skin" id="btn-save-current-skin"
+                                        title="Sauvegarder le skin actuel">+</button>
+                                </div>
+                                <div class="skin-library-list" id="skin-library-list">
+                                    <!-- Saved skins will appear here -->
+                                    <div class="skin-library-empty">Aucun skin sauvegardé</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Mods Tab -->
                 <div class="tab-content hidden" id="tab-mods">
-                    <h2>Mods installés</h2>
-                    <div class="mods-grid" id="mods-list">
-                        <!-- Mods will be listed here -->
-                        <div class="mod-card">
-                            <div class="mod-icon">📦</div>
-                            <div class="mod-info">
-                                <span class="mod-name">Chargement...</span>
+                    <div class="mods-page">
+                        <div class="mods-page-header">
+                            <div>
+                                <h2>Mods du Modpack</h2>
+                                <p class="subtitle">Red Empire • 93 mods installés</p>
+                            </div>
+                            <a href="mods-showcase.html" class="btn-view-mods">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                    <polyline points="15 3 21 3 21 9" />
+                                    <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                                Voir tous les mods
+                            </a>
+                        </div>
+                        <div class="mods-quick-stats">
+                            <div class="quick-stat">
+                                <span class="stat-icon">🚀</span>
+                                <span class="stat-value">4</span>
+                                <span class="stat-name">Performance</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-icon">🌍</span>
+                                <span class="stat-value">8</span>
+                                <span class="stat-name">World Gen</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-icon">🏰</span>
+                                <span class="stat-value">24</span>
+                                <span class="stat-name">Structures</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-icon">⚔️</span>
+                                <span class="stat-value">4</span>
+                                <span class="stat-name">Combat</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-icon">🔧</span>
+                                <span class="stat-value">18</span>
+                                <span class="stat-name">QoL</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="stat-icon">📚</span>
+                                <span class="stat-value">25</span>
+                                <span class="stat-name">Libraries</span>
+                            </div>
+                        </div>
+                        <div class="featured-mods-section">
+                            <h3>Mods phares</h3>
+                            <div class="featured-mods-grid">
+                                <div class="featured-mod-card">
+                                    <span class="mod-emoji">🌍</span>
+                                    <div>
+                                        <strong>Terralith</strong>
+                                        <span>95+ nouveaux biomes</span>
+                                    </div>
+                                </div>
+                                <div class="featured-mod-card">
+                                    <span class="mod-emoji">🏰</span>
+                                    <div>
+                                        <strong>Dungeons Arise</strong>
+                                        <span>Structures épiques</span>
+                                    </div>
+                                </div>
+                                <div class="featured-mod-card">
+                                    <span class="mod-emoji">⚔️</span>
+                                    <div>
+                                        <strong>Simply Swords</strong>
+                                        <span>Armes uniques</span>
+                                    </div>
+                                </div>
+                                <div class="featured-mod-card">
+                                    <span class="mod-emoji">🚀</span>
+                                    <div>
+                                        <strong>Sodium + Iris</strong>
+                                        <span>Performance + Shaders</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -241,32 +465,91 @@
 
                 <!-- Settings Tab -->
                 <div class="tab-content hidden" id="tab-settings">
-                    <h2>Paramètres</h2>
+                    <div class="settings-page">
+                        <h2>Paramètres</h2>
 
-                    <div class="settings-section">
-                        <h3>Mémoire (RAM)</h3>
-                        <div class="setting-row">
-                            <label for="ram-slider">RAM allouée à Minecraft</label>
-                            <div class="ram-control">
-                                <input type="range" id="ram-slider" min="2" max="16" value="4" step="1">
-                                <span class="ram-value" id="ram-value">4 Go</span>
+                        <div class="settings-card">
+                            <h3>🎮 Performance</h3>
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span>RAM allouée</span>
+                                    <span class="setting-hint">Recommandé: 6-8 Go pour les modpacks</span>
+                                </div>
+                                <div class="ram-slider-container">
+                                    <input type="range" id="ram-slider" class="ram-slider" min="2" max="16" value="4"
+                                        step="1">
+                                    <span class="ram-display" id="ram-value">4 Go</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="settings-section">
-                        <h3>Répertoire du jeu</h3>
-                        <div class="setting-row">
-                            <span class="path-display" id="game-path">%APPDATA%\.yonix-launcher</span>
-                            <button class="btn btn-secondary" id="btn-open-folder">Ouvrir le dossier</button>
+                        <div class="settings-card">
+                            <h3>📁 Fichiers</h3>
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span>Répertoire du jeu</span>
+                                    <span class="setting-path" id="game-path">%APPDATA%\.pierow-launcher</span>
+                                </div>
+                                <button class="btn-small" id="btn-open-folder">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path
+                                            d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                    </svg>
+                                    Ouvrir
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="settings-section">
-                        <h3>À propos</h3>
-                        <div class="about-info">
-                            <p>YoNiX Launcher v1.0.0</p>
-                            <p>Minecraft 1.21.1 avec Fabric</p>
+                        <div class="settings-card">
+                            <h3>👤 Apparence</h3>
+                            <div class="setting-item skin-setting">
+                                <div class="skin-preview-container">
+                                    <div class="skin-preview" id="skin-preview">
+                                        <img src="" alt="Skin" id="skin-preview-img">
+                                        <div class="skin-placeholder">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="1.5">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                                <circle cx="12" cy="7" r="4" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="skin-actions">
+                                    <div class="setting-label">
+                                        <span>Skin Minecraft</span>
+                                        <span class="setting-hint">Changer votre skin dans le jeu</span>
+                                    </div>
+                                    <button class="btn-small btn-skin" id="btn-change-skin">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="17 8 12 3 7 8" />
+                                            <line x1="12" y1="3" x2="12" y2="15" />
+                                        </svg>
+                                        Changer le skin
+                                    </button>
+                                    <a href="https://www.minecraft.net/fr-fr/msaprofile/mygames/editskin"
+                                        target="_blank" class="btn-small btn-link-skin">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                            <polyline points="15 3 21 3 21 9" />
+                                            <line x1="10" y1="14" x2="21" y2="3" />
+                                        </svg>
+                                        Modifier sur minecraft.net
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3>ℹ️ À propos</h3>
+                            <div class="about-content">
+                                <p><strong>PiErOW Launcher</strong> v1.0.0</p>
+                                <p>Red Empire Modpack • Minecraft 1.21.1 Fabric</p>
+                            </div>
                         </div>
                     </div>
                 </div>
