@@ -93,16 +93,41 @@ class MinecraftLauncher {
         }
 
         // Check local Java installation
-        const localJava = path.join(this.gameDir, 'runtime', 'java', 'bin', 'java.exe');
+        const runtimeDir = path.join(this.gameDir, 'runtime');
+        const localJava = path.join(runtimeDir, 'java', 'bin', 'java.exe');
+
         if (fs.existsSync(localJava)) {
             this.javaPath = localJava;
             return;
         }
 
+        // Also check for jdk-* or jre-* folders (if rename failed)
+        if (fs.existsSync(runtimeDir)) {
+            const jdkFolder = fs.readdirSync(runtimeDir)
+                .find(f => f.startsWith('jdk-') || f.startsWith('jre-'));
+            if (jdkFolder) {
+                const altJava = path.join(runtimeDir, jdkFolder, 'bin', 'java.exe');
+                if (fs.existsSync(altJava)) {
+                    this.javaPath = altJava;
+                    return;
+                }
+            }
+        }
+
         // Download Java (Adoptium/Temurin JRE 21)
         this.emitProgress('Downloading Java 21...', 15);
         await this.downloadJava();
-        this.javaPath = localJava;
+
+        // After download, check again for the java path
+        if (fs.existsSync(localJava)) {
+            this.javaPath = localJava;
+        } else if (fs.existsSync(runtimeDir)) {
+            const jdkFolder = fs.readdirSync(runtimeDir)
+                .find(f => f.startsWith('jdk-') || f.startsWith('jre-'));
+            if (jdkFolder) {
+                this.javaPath = path.join(runtimeDir, jdkFolder, 'bin', 'java.exe');
+            }
+        }
     }
 
     async checkJavaVersion() {
@@ -129,8 +154,11 @@ class MinecraftLauncher {
     }
 
     async downloadJava() {
-        const javaDir = path.join(this.gameDir, 'runtime', 'java');
-        fs.mkdirSync(javaDir, { recursive: true });
+        const runtimeDir = path.join(this.gameDir, 'runtime');
+        const javaDir = path.join(runtimeDir, 'java');
+
+        // Create runtime directory
+        fs.mkdirSync(runtimeDir, { recursive: true });
 
         // Adoptium API for Windows x64 JRE 21
         const apiUrl = 'https://api.adoptium.net/v3/assets/latest/21/hotspot?architecture=x64&image_type=jre&os=windows&vendor=eclipse';
@@ -140,7 +168,7 @@ class MinecraftLauncher {
         const downloadUrl = asset.binary.package.link;
 
         // Download zip
-        const zipPath = path.join(this.gameDir, 'runtime', 'java.zip');
+        const zipPath = path.join(runtimeDir, 'java.zip');
         const downloadStream = got.stream(downloadUrl);
         const writeStream = fs.createWriteStream(zipPath);
 
@@ -152,21 +180,41 @@ class MinecraftLauncher {
 
         // Extract
         const zip = new AdmZip(zipPath);
-        zip.extractAllTo(path.join(this.gameDir, 'runtime'), true);
+        zip.extractAllTo(runtimeDir, true);
 
-        // Rename extracted folder to 'java'
-        const extracted = fs.readdirSync(path.join(this.gameDir, 'runtime'))
+        // Find extracted folder
+        const extracted = fs.readdirSync(runtimeDir)
             .find(f => f.startsWith('jdk-') || f.startsWith('jre-'));
 
         if (extracted) {
-            fs.renameSync(
-                path.join(this.gameDir, 'runtime', extracted),
-                javaDir
-            );
+            const extractedPath = path.join(runtimeDir, extracted);
+
+            // Remove empty java folder if it exists (we created it earlier)
+            if (fs.existsSync(javaDir)) {
+                try {
+                    fs.rmSync(javaDir, { recursive: true, force: true });
+                } catch (e) {
+                    console.log('[Java] Could not remove java folder:', e.message);
+                }
+            }
+
+            // Try to rename, if fails just use the extracted folder name
+            try {
+                fs.renameSync(extractedPath, javaDir);
+                console.log('[Java] Renamed to java folder');
+            } catch (e) {
+                console.log('[Java] Could not rename, using original folder:', extracted);
+                // Update javaPath to use the extracted folder name instead
+                this.javaExtractedName = extracted;
+            }
         }
 
-        // Cleanup
-        fs.unlinkSync(zipPath);
+        // Cleanup zip
+        try {
+            fs.unlinkSync(zipPath);
+        } catch (e) {
+            console.log('[Java] Could not delete zip:', e.message);
+        }
     }
 
     /**
