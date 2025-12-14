@@ -58,12 +58,6 @@
       "modpack.json",
       "node_modules/**/*"
     ],
-    "extraResources": [
-      {
-        "from": "build/install-music.webm",
-        "to": "install-music.webm"
-      }
-    ],
     "publish": {
       "provider": "github",
       "owner": "YoNiX17",
