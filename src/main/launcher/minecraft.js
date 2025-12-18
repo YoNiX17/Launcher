@@ -178,64 +178,156 @@ class MinecraftLauncher {
         const runtimeDir = path.join(this.gameDir, 'runtime');
         const javaDir = path.join(runtimeDir, 'java');
 
+        logger.info('Java', '========== DOWNLOADING JAVA ==========');
+        logger.info('Java', `Runtime directory: ${runtimeDir}`);
+
         // Create runtime directory
-        fs.mkdirSync(runtimeDir, { recursive: true });
+        try {
+            fs.mkdirSync(runtimeDir, { recursive: true });
+            logger.info('Java', 'Runtime directory created');
+        } catch (e) {
+            logger.error('Java', 'Failed to create runtime directory', e);
+            throw new Error(`Cannot create runtime directory: ${e.message}`);
+        }
 
         // Adoptium API for Windows x64 JRE 21
         const apiUrl = 'https://api.adoptium.net/v3/assets/latest/21/hotspot?architecture=x64&image_type=jre&os=windows&vendor=eclipse';
+        logger.info('Java', `Fetching Java info from: ${apiUrl}`);
 
-        const response = await got.get(apiUrl, { responseType: 'json' });
-        const asset = response.body[0];
+        let asset;
+        try {
+            const response = await got.get(apiUrl, { responseType: 'json', timeout: { request: 30000 } });
+            if (!response.body || response.body.length === 0) {
+                throw new Error('No Java versions found');
+            }
+            asset = response.body[0];
+            logger.info('Java', `Found Java version: ${asset.version?.semver || 'unknown'}`);
+            logger.info('Java', `Download URL: ${asset.binary.package.link}`);
+            logger.info('Java', `File size: ${Math.round(asset.binary.package.size / 1024 / 1024)} MB`);
+        } catch (e) {
+            logger.error('Java', 'Failed to fetch Java info from Adoptium API', e);
+            throw new Error(`Cannot fetch Java info: ${e.message}`);
+        }
+
         const downloadUrl = asset.binary.package.link;
-
-        // Download zip
         const zipPath = path.join(runtimeDir, 'java.zip');
-        const downloadStream = got.stream(downloadUrl);
-        const writeStream = fs.createWriteStream(zipPath);
 
-        await new Promise((resolve, reject) => {
-            downloadStream.pipe(writeStream);
-            downloadStream.on('error', reject);
-            writeStream.on('finish', resolve);
-        });
+        // Download zip with progress
+        logger.info('Java', `Downloading to: ${zipPath}`);
+        try {
+            const downloadStream = got.stream(downloadUrl, { timeout: { request: 300000 } });
+            const writeStream = fs.createWriteStream(zipPath);
+
+            let downloaded = 0;
+            const totalSize = asset.binary.package.size;
+
+            downloadStream.on('downloadProgress', (progress) => {
+                downloaded = progress.transferred;
+                const percent = Math.round((downloaded / totalSize) * 100);
+                if (percent % 20 === 0) {
+                    logger.info('Java', `Download progress: ${percent}%`);
+                }
+            });
+
+            await new Promise((resolve, reject) => {
+                downloadStream.pipe(writeStream);
+                downloadStream.on('error', (e) => {
+                    logger.error('Java', 'Download stream error', e);
+                    reject(e);
+                });
+                writeStream.on('error', (e) => {
+                    logger.error('Java', 'Write stream error', e);
+                    reject(e);
+                });
+                writeStream.on('finish', () => {
+                    logger.info('Java', 'Download complete');
+                    resolve();
+                });
+            });
+        } catch (e) {
+            logger.error('Java', 'Failed to download Java', e);
+            throw new Error(`Java download failed: ${e.message}`);
+        }
+
+        // Verify zip file exists and has content
+        if (!fs.existsSync(zipPath)) {
+            logger.error('Java', 'Zip file does not exist after download');
+            throw new Error('Java zip file not found after download');
+        }
+        const zipStats = fs.statSync(zipPath);
+        logger.info('Java', `Zip file size: ${Math.round(zipStats.size / 1024 / 1024)} MB`);
+        if (zipStats.size < 1000000) {
+            logger.error('Java', 'Zip file too small, download may have failed');
+            throw new Error('Java zip file is too small, download may have failed');
+        }
 
         // Extract
-        const zip = new AdmZip(zipPath);
-        zip.extractAllTo(runtimeDir, true);
+        logger.info('Java', 'Extracting Java...');
+        try {
+            const zip = new AdmZip(zipPath);
+            zip.extractAllTo(runtimeDir, true);
+            logger.info('Java', 'Extraction complete');
+        } catch (e) {
+            logger.error('Java', 'Failed to extract Java', e);
+            throw new Error(`Java extraction failed: ${e.message}`);
+        }
 
         // Find extracted folder
-        const extracted = fs.readdirSync(runtimeDir)
-            .find(f => f.startsWith('jdk-') || f.startsWith('jre-'));
+        const folders = fs.readdirSync(runtimeDir);
+        logger.info('Java', `Folders in runtime: ${folders.join(', ')}`);
+
+        const extracted = folders.find(f => f.startsWith('jdk-') || f.startsWith('jre-'));
+        logger.info('Java', `Extracted folder: ${extracted || 'NOT FOUND'}`);
 
         if (extracted) {
             const extractedPath = path.join(runtimeDir, extracted);
+            const javaExe = path.join(extractedPath, 'bin', 'java.exe');
 
-            // Remove empty java folder if it exists (we created it earlier)
-            if (fs.existsSync(javaDir)) {
-                try {
-                    fs.rmSync(javaDir, { recursive: true, force: true });
-                } catch (e) {
-                    console.log('[Java] Could not remove java folder:', e.message);
+            // Verify java.exe exists in extracted folder
+            if (fs.existsSync(javaExe)) {
+                logger.info('Java', `Java.exe found at: ${javaExe}`);
+            } else {
+                logger.error('Java', `Java.exe NOT found at: ${javaExe}`);
+                // List bin folder contents
+                const binPath = path.join(extractedPath, 'bin');
+                if (fs.existsSync(binPath)) {
+                    const binFiles = fs.readdirSync(binPath);
+                    logger.info('Java', `Files in bin: ${binFiles.slice(0, 10).join(', ')}`);
                 }
             }
 
-            // Try to rename, if fails just use the extracted folder name
+            // Try to rename to java folder
+            if (fs.existsSync(javaDir)) {
+                try {
+                    fs.rmSync(javaDir, { recursive: true, force: true });
+                    logger.info('Java', 'Removed existing java folder');
+                } catch (e) {
+                    logger.warn('Java', `Could not remove java folder: ${e.message}`);
+                }
+            }
+
             try {
                 fs.renameSync(extractedPath, javaDir);
-                console.log('[Java] Renamed to java folder');
+                logger.info('Java', 'Renamed to java folder successfully');
             } catch (e) {
-                console.log('[Java] Could not rename, using original folder:', extracted);
-                // Update javaPath to use the extracted folder name instead
+                logger.warn('Java', `Could not rename to java folder: ${e.message}`);
+                logger.info('Java', `Will use original folder: ${extracted}`);
                 this.javaExtractedName = extracted;
             }
+        } else {
+            logger.error('Java', 'No JDK/JRE folder found after extraction');
+            throw new Error('Java extraction failed - no JDK folder found');
         }
 
         // Cleanup zip
         try {
             fs.unlinkSync(zipPath);
+            logger.info('Java', 'Cleaned up zip file');
         } catch (e) {
-            console.log('[Java] Could not delete zip:', e.message);
+            logger.warn('Java', `Could not delete zip: ${e.message}`);
         }
+
+        logger.info('Java', '========== JAVA DOWNLOAD COMPLETE ==========');
     }
 
     /**
