@@ -5,6 +5,7 @@ const fs = require('fs');
 const got = require('got');
 const AdmZip = require('adm-zip');
 const Store = require('electron-store');
+const { logger } = require('../utils/logger');
 
 const store = new Store();
 
@@ -37,46 +38,66 @@ class MinecraftLauncher {
      * Launch Minecraft with Fabric
      */
     async launch(profile) {
-        console.log('[MinecraftLauncher] Starting launch process...');
-        console.log('[MinecraftLauncher] Profile:', profile);
+        logger.info('Minecraft', '========== STARTING LAUNCH PROCESS ==========');
+        logger.info('Minecraft', `Profile: ${JSON.stringify(profile)}`);
+        logger.info('Minecraft', `Game directory: ${this.gameDir}`);
         this.emitProgress('Preparing launch...', 0);
 
         try {
             // Ensure game directory exists
-            console.log('[MinecraftLauncher] Creating game directory:', this.gameDir);
-            fs.mkdirSync(this.gameDir, { recursive: true });
+            logger.info('Minecraft', `Creating game directory: ${this.gameDir}`);
+            try {
+                fs.mkdirSync(this.gameDir, { recursive: true });
+                logger.info('Minecraft', 'Game directory created/verified');
+            } catch (e) {
+                logger.error('Minecraft', 'Failed to create game directory', e);
+                throw new Error(`Cannot create game directory: ${e.message}`);
+            }
 
             // Check/install Java
-            console.log('[MinecraftLauncher] Checking Java...');
+            logger.info('Minecraft', 'Checking Java installation...');
             this.emitProgress('Checking Java...', 10);
             await this.ensureJava();
-            console.log('[MinecraftLauncher] Java path:', this.javaPath);
+            logger.info('Minecraft', `Java path: ${this.javaPath}`);
+
+            // Verify Java exists
+            if (!fs.existsSync(this.javaPath)) {
+                logger.error('Minecraft', `Java not found at: ${this.javaPath}`);
+                throw new Error(`Java not found at: ${this.javaPath}`);
+            }
+            logger.info('Minecraft', 'Java verified OK');
 
             // Check/install Minecraft
-            console.log('[MinecraftLauncher] Checking Minecraft...');
+            logger.info('Minecraft', 'Checking Minecraft installation...');
             this.emitProgress('Checking Minecraft...', 30);
             await this.ensureMinecraft();
+            logger.info('Minecraft', 'Minecraft verified OK');
 
             // Check/install Fabric
-            console.log('[MinecraftLauncher] Checking Fabric...');
+            logger.info('Minecraft', 'Checking Fabric installation...');
             this.emitProgress('Checking Fabric...', 50);
             await this.ensureFabric();
+            logger.info('Minecraft', 'Fabric verified OK');
 
             // Build launch arguments
-            console.log('[MinecraftLauncher] Building launch arguments...');
+            logger.info('Minecraft', 'Building launch arguments...');
             this.emitProgress('Building launch arguments...', 70);
             const args = await this.buildLaunchArgs(profile);
-            console.log('[MinecraftLauncher] Launch args:', args.join(' '));
+            logger.info('Minecraft', `Launch command: ${this.javaPath}`);
+            logger.info('Minecraft', `Arguments count: ${args.length}`);
+            logger.debug('Minecraft', `Full args: ${args.join(' ')}`);
 
             // Launch the game
-            console.log('[MinecraftLauncher] Spawning Minecraft process...');
+            logger.info('Minecraft', 'Spawning Minecraft process...');
             this.emitProgress('Launching Minecraft...', 90);
             await this.spawnMinecraft(args);
 
-            console.log('[MinecraftLauncher] Game launched successfully!');
+            logger.info('Minecraft', 'Game launched successfully!');
+            logger.info('Minecraft', '========== LAUNCH COMPLETE ==========');
             this.emitProgress('Game launched!', 100);
         } catch (error) {
-            console.error('[MinecraftLauncher] Error during launch:', error);
+            logger.error('Minecraft', 'Error during launch', error);
+            logger.info('Minecraft', '========== LAUNCH FAILED ==========');
             throw error;
         }
     }

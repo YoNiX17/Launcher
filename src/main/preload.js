@@ -47,5 +47,10 @@ contextBridge.exposeInMainWorld('launcher', {
     // Modpack
     syncModpack: (modpackPath) => ipcRenderer.invoke('modpack:sync', modpackPath),
     getInstalledMods: () => ipcRenderer.invoke('modpack:get-mods'),
-    onModpackProgress: (callback) => ipcRenderer.on('modpack:progress', (_, progress) => callback(progress))
+    onModpackProgress: (callback) => ipcRenderer.on('modpack:progress', (_, progress) => callback(progress)),
+
+    // Logs
+    getLogPath: () => ipcRenderer.invoke('logs:get-path'),
+    getLogsDir: () => ipcRenderer.invoke('logs:get-dir'),
+    openLogsFolder: () => ipcRenderer.invoke('logs:open-folder')
 });

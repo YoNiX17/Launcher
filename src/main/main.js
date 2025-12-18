@@ -10,6 +10,7 @@ const { GitHubUpdater } = require('./updater/github');
 const { MinecraftLauncher } = require('./launcher/minecraft');
 const { ModpackManager } = require('./launcher/modpack');
 const { autoUpdater } = require('electron-updater');
+const { logger } = require('./utils/logger');
 
 // Config store
 const store = new Store();
@@ -45,7 +46,13 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+    // Initialize logger first
+    logger.init();
+    logger.info('App', 'PiErOW Launcher starting...');
+    logger.info('App', `Log file: ${logger.getLogPath()}`);
+
     createWindow();
+    logger.info('App', 'Main window created');
 
     // Auto-updater setup (only in production)
     if (!process.argv.includes('--dev')) {
@@ -133,6 +140,20 @@ ipcMain.handle('update:install', () => {
 
 ipcMain.handle('update:get-version', () => {
     return app.getVersion();
+});
+
+// Logging
+ipcMain.handle('logs:get-path', () => {
+    return logger.getLogPath();
+});
+
+ipcMain.handle('logs:get-dir', () => {
+    return logger.getLogsDir();
+});
+
+ipcMain.handle('logs:open-folder', () => {
+    const { shell } = require('electron');
+    shell.openPath(logger.getLogsDir());
 });
 
 // Authentication - Multi-profile support
