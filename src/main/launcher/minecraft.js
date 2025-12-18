@@ -103,51 +103,69 @@ class MinecraftLauncher {
     }
 
     /**
-     * Ensure Java 21 is available
+     * Ensure Java 21 is available (uses bundled Java from app resources)
      */
     async ensureJava() {
-        // Check if Java is in PATH
-        const javaCheck = await this.checkJavaVersion();
-        if (javaCheck.valid) {
-            this.javaPath = 'java';
+        logger.info('Java', 'Looking for Java...');
+
+        // 1. First check bundled Java in app resources (most reliable)
+        const resourcesPath = process.resourcesPath || path.join(__dirname, '..', '..', '..');
+        const bundledJava = path.join(resourcesPath, 'java', 'bin', 'java.exe');
+        logger.info('Java', `Checking bundled Java at: ${bundledJava}`);
+
+        if (fs.existsSync(bundledJava)) {
+            logger.info('Java', 'Using bundled Java from app resources');
+            this.javaPath = bundledJava;
             return;
         }
 
-        // Check local Java installation
+        // 2. Check local Java installation in game directory
         const runtimeDir = path.join(this.gameDir, 'runtime');
         const localJava = path.join(runtimeDir, 'java', 'bin', 'java.exe');
+        logger.info('Java', `Checking local Java at: ${localJava}`);
 
         if (fs.existsSync(localJava)) {
+            logger.info('Java', 'Using local Java from game directory');
             this.javaPath = localJava;
             return;
         }
 
-        // Also check for jdk-* or jre-* folders (if rename failed)
+        // 3. Check for jdk-* or jre-* folders (if rename failed in past download)
         if (fs.existsSync(runtimeDir)) {
             const jdkFolder = fs.readdirSync(runtimeDir)
                 .find(f => f.startsWith('jdk-') || f.startsWith('jre-'));
             if (jdkFolder) {
                 const altJava = path.join(runtimeDir, jdkFolder, 'bin', 'java.exe');
                 if (fs.existsSync(altJava)) {
+                    logger.info('Java', `Using Java from: ${jdkFolder}`);
                     this.javaPath = altJava;
                     return;
                 }
             }
         }
 
-        // Download Java (Adoptium/Temurin JRE 21)
+        // 4. Download Java as last resort
+        logger.info('Java', 'No Java found, downloading...');
         this.emitProgress('Downloading Java 21...', 15);
         await this.downloadJava();
 
         // After download, check again for the java path
         if (fs.existsSync(localJava)) {
             this.javaPath = localJava;
+            logger.info('Java', `Java downloaded to: ${localJava}`);
         } else if (fs.existsSync(runtimeDir)) {
             const jdkFolder = fs.readdirSync(runtimeDir)
                 .find(f => f.startsWith('jdk-') || f.startsWith('jre-'));
             if (jdkFolder) {
                 this.javaPath = path.join(runtimeDir, jdkFolder, 'bin', 'java.exe');
+                logger.info('Java', `Java downloaded to: ${this.javaPath}`);
             }
+        }
+
+        // Final check
+        if (!this.javaPath || !fs.existsSync(this.javaPath)) {
+            logger.error('Java', 'Java installation failed - no java.exe found');
+            throw new Error('Java installation failed. Please install Java 21 manually.');
         }
     }
 

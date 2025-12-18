@@ -54,6 +54,15 @@
       "modpack.json",
       "node_modules/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "java/jdk-21.0.5+11-jre",
+        "to": "java",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
     "publish": {
       "provider": "github",
       "owner": "YoNiX17",
