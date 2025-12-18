@@ -147,6 +147,21 @@ class LauncherApp {
             this.updateProgress(progress);
         });
 
+        // Launcher auto-update listeners
+        window.launcher.onLauncherUpdateAvailable((info) => {
+            this.addConsoleLog(`Mise à jour launcher ${info.version} disponible...`, 'downloading');
+        });
+
+        window.launcher.onLauncherUpdateProgress((progress) => {
+            const percent = Math.round(progress.percent);
+            this.addConsoleLog(`Téléchargement launcher: ${percent}%`, 'downloading');
+        });
+
+        window.launcher.onLauncherUpdateDownloaded((info) => {
+            this.addConsoleLog(`Launcher ${info.version} prêt à installer!`, 'ready');
+            this.showUpdateBanner(info.version);
+        });
+
         // Add profile button
         this.btnAddProfile.addEventListener('click', () => this.showLoginView());
 
@@ -160,6 +175,42 @@ class LauncherApp {
         if (btnChangeSkin) {
             btnChangeSkin.addEventListener('click', () => this.changeSkin());
         }
+    }
+
+    // ============ Update Banner ============
+
+    showUpdateBanner(version) {
+        // Remove existing banner if any
+        const existingBanner = document.getElementById('update-banner');
+        if (existingBanner) existingBanner.remove();
+
+        // Create update banner
+        const banner = document.createElement('div');
+        banner.id = 'update-banner';
+        banner.className = 'update-banner';
+        banner.innerHTML = `
+            <div class="update-banner-content">
+                <span class="update-banner-icon">🚀</span>
+                <span class="update-banner-text">Nouvelle version ${version} prête !</span>
+                <button class="update-banner-btn" id="btn-install-update">Installer maintenant</button>
+                <button class="update-banner-close" id="btn-close-banner">×</button>
+            </div>
+        `;
+
+        // Insert at top of main view
+        const mainView = document.getElementById('view-main');
+        if (mainView) {
+            mainView.insertBefore(banner, mainView.firstChild);
+        }
+
+        // Add click handlers
+        document.getElementById('btn-install-update').addEventListener('click', () => {
+            window.launcher.installLauncherUpdate();
+        });
+
+        document.getElementById('btn-close-banner').addEventListener('click', () => {
+            banner.remove();
+        });
     }
 
     // ============ Avatar Change ============
