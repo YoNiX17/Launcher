@@ -536,7 +536,7 @@ class MinecraftLauncher {
         console.log(`[MinecraftLauncher] Downloading ${totalMissing} missing assets (parallel)...`);
 
         let downloaded = 0;
-        const BATCH_SIZE = 50; // Download 50 assets in parallel
+        const BATCH_SIZE = 400; // Download 400 assets in parallel for max speed
 
         // Process in batches
         for (let i = 0; i < missingAssets.length; i += BATCH_SIZE) {
