@@ -192,24 +192,34 @@ class MinecraftLauncher {
 
         // Adoptium API for Windows x64 JRE 21
         const apiUrl = 'https://api.adoptium.net/v3/assets/latest/21/hotspot?architecture=x64&image_type=jre&os=windows&vendor=eclipse';
+        // Fallback direct download URL (in case API fails)
+        const fallbackUrl = 'https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5%2B11/OpenJDK21U-jre_x64_windows_hotspot_21.0.5_11.zip';
+        const fallbackSize = 52000000; // ~50MB
+
         logger.info('Java', `Fetching Java info from: ${apiUrl}`);
 
-        let asset;
+        let downloadUrl;
+        let expectedSize;
+
         try {
             const response = await got.get(apiUrl, { responseType: 'json', timeout: { request: 30000 } });
             if (!response.body || response.body.length === 0) {
                 throw new Error('No Java versions found');
             }
-            asset = response.body[0];
+            const asset = response.body[0];
+            downloadUrl = asset.binary.package.link;
+            expectedSize = asset.binary.package.size;
             logger.info('Java', `Found Java version: ${asset.version?.semver || 'unknown'}`);
-            logger.info('Java', `Download URL: ${asset.binary.package.link}`);
-            logger.info('Java', `File size: ${Math.round(asset.binary.package.size / 1024 / 1024)} MB`);
+            logger.info('Java', `Download URL: ${downloadUrl}`);
+            logger.info('Java', `File size: ${Math.round(expectedSize / 1024 / 1024)} MB`);
         } catch (e) {
-            logger.error('Java', 'Failed to fetch Java info from Adoptium API', e);
-            throw new Error(`Cannot fetch Java info: ${e.message}`);
+            logger.warn('Java', `API failed: ${e.message}`);
+            logger.info('Java', 'Using fallback download URL...');
+            downloadUrl = fallbackUrl;
+            expectedSize = fallbackSize;
+            logger.info('Java', `Fallback URL: ${downloadUrl}`);
         }
 
-        const downloadUrl = asset.binary.package.link;
         const zipPath = path.join(runtimeDir, 'java.zip');
 
         // Download zip with progress
@@ -219,7 +229,7 @@ class MinecraftLauncher {
             const writeStream = fs.createWriteStream(zipPath);
 
             let downloaded = 0;
-            const totalSize = asset.binary.package.size;
+            const totalSize = expectedSize;
 
             downloadStream.on('downloadProgress', (progress) => {
                 downloaded = progress.transferred;

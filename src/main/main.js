@@ -56,46 +56,54 @@ app.whenReady().then(() => {
 
     // Auto-updater setup (only in production)
     if (!process.argv.includes('--dev')) {
+        logger.info('AutoUpdater', 'Initializing auto-updater...');
+
         // Configure auto-updater
         autoUpdater.autoDownload = true;
         autoUpdater.autoInstallOnAppQuit = true;
 
         // Check for updates
+        logger.info('AutoUpdater', 'Checking for updates...');
         autoUpdater.checkForUpdatesAndNotify();
 
         // Update events
         autoUpdater.on('checking-for-update', () => {
-            console.log('[AutoUpdater] Checking for updates...');
+            logger.info('AutoUpdater', 'Checking for updates...');
         });
 
         autoUpdater.on('update-available', (info) => {
-            console.log('[AutoUpdater] Update available:', info.version);
+            logger.info('AutoUpdater', `Update available: ${info.version}`);
+            logger.info('AutoUpdater', `Current version: ${app.getVersion()}`);
             if (mainWindow) {
                 mainWindow.webContents.send('update:available', info);
             }
         });
 
-        autoUpdater.on('update-not-available', () => {
-            console.log('[AutoUpdater] No updates available');
+        autoUpdater.on('update-not-available', (info) => {
+            logger.info('AutoUpdater', 'No updates available');
+            logger.info('AutoUpdater', `Current version: ${app.getVersion()}`);
         });
 
         autoUpdater.on('download-progress', (progress) => {
-            console.log(`[AutoUpdater] Download: ${Math.round(progress.percent)}%`);
+            logger.info('AutoUpdater', `Download progress: ${Math.round(progress.percent)}%`);
             if (mainWindow) {
                 mainWindow.webContents.send('update:progress', progress);
             }
         });
 
         autoUpdater.on('update-downloaded', (info) => {
-            console.log('[AutoUpdater] Update downloaded:', info.version);
+            logger.info('AutoUpdater', `Update downloaded: ${info.version}`);
+            logger.info('AutoUpdater', 'Update will be installed on app quit');
             if (mainWindow) {
                 mainWindow.webContents.send('update:downloaded', info);
             }
         });
 
         autoUpdater.on('error', (error) => {
-            console.error('[AutoUpdater] Error:', error.message);
+            logger.error('AutoUpdater', 'Auto-updater error', error);
         });
+    } else {
+        logger.info('AutoUpdater', 'Running in dev mode, auto-updater disabled');
     }
 });
 
