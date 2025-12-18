@@ -1,6 +1,6 @@
 {
   "name": "pierow-launcher",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Red Empire Modpack Launcher for Minecraft Fabric 1.21.1",
   "main": "src/main/main.js",
   "scripts": {
