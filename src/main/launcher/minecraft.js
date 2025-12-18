@@ -11,7 +11,7 @@ const store = new Store();
 
 // Minecraft/Fabric versions
 const MC_VERSION = '1.21.1';
-const FABRIC_LOADER_VERSION = '0.17.0';
+const FABRIC_LOADER_VERSION = '0.18.0';
 
 // URLs
 const VERSION_MANIFEST_URL = 'https://launchermeta.mojang.com/mc/game/version_manifest_v2.json';
@@ -412,6 +412,9 @@ class MinecraftLauncher {
         const libDir = path.join(this.gameDir, 'libraries');
         fs.mkdirSync(libDir, { recursive: true });
 
+        // Collect all libraries to download
+        const toDownload = [];
+
         for (const lib of libraries) {
             // Check rules (OS compatibility)
             if (lib.rules && !this.checkRules(lib.rules)) {
@@ -424,21 +427,12 @@ class MinecraftLauncher {
                 const libPath = path.join(libDir, artifact.path);
 
                 if (!fs.existsSync(libPath)) {
-                    fs.mkdirSync(path.dirname(libPath), { recursive: true });
-                    console.log('[MinecraftLauncher] Downloading library:', artifact.path);
-
-                    try {
-                        const stream = got.stream(artifact.url);
-                        const writeStream = fs.createWriteStream(libPath);
-
-                        await new Promise((resolve, reject) => {
-                            stream.pipe(writeStream);
-                            stream.on('error', reject);
-                            writeStream.on('finish', resolve);
-                        });
-                    } catch (error) {
-                        console.error('[MinecraftLauncher] Failed to download:', artifact.path, error.message);
-                    }
+                    toDownload.push({
+                        type: 'minecraft',
+                        path: artifact.path,
+                        fullPath: libPath,
+                        url: artifact.url
+                    });
                 }
             }
             // Fabric/Maven-style library (has name and url)
@@ -447,29 +441,56 @@ class MinecraftLauncher {
                 const fullPath = path.join(libDir, libPath);
 
                 if (!fs.existsSync(fullPath)) {
-                    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-
-                    // Construct Maven URL
                     const baseUrl = lib.url || 'https://libraries.minecraft.net/';
-                    const downloadUrl = baseUrl + libPath;
-
-                    console.log('[MinecraftLauncher] Downloading Fabric library:', libPath);
-
-                    try {
-                        const stream = got.stream(downloadUrl);
-                        const writeStream = fs.createWriteStream(fullPath);
-
-                        await new Promise((resolve, reject) => {
-                            stream.pipe(writeStream);
-                            stream.on('error', reject);
-                            writeStream.on('finish', resolve);
-                        });
-                    } catch (error) {
-                        console.error('[MinecraftLauncher] Failed to download:', libPath, error.message);
-                    }
+                    toDownload.push({
+                        type: 'fabric',
+                        path: libPath,
+                        fullPath: fullPath,
+                        url: baseUrl + libPath
+                    });
                 }
             }
         }
+
+        if (toDownload.length === 0) {
+            logger.info('Libraries', 'All libraries already downloaded');
+            return;
+        }
+
+        logger.info('Libraries', `Downloading ${toDownload.length} libraries in parallel...`);
+
+        // Download in batches of 10
+        const BATCH_SIZE = 10;
+        let downloaded = 0;
+
+        for (let i = 0; i < toDownload.length; i += BATCH_SIZE) {
+            const batch = toDownload.slice(i, i + BATCH_SIZE);
+
+            const promises = batch.map(async (lib) => {
+                fs.mkdirSync(path.dirname(lib.fullPath), { recursive: true });
+
+                try {
+                    const response = await got.get(lib.url, {
+                        responseType: 'buffer',
+                        timeout: { request: 30000 }
+                    });
+                    fs.writeFileSync(lib.fullPath, response.body);
+                    return true;
+                } catch (error) {
+                    logger.warn('Libraries', `Failed to download: ${lib.path} - ${error.message}`);
+                    return false;
+                }
+            });
+
+            const results = await Promise.all(promises);
+            downloaded += results.filter(r => r).length;
+
+            // Update progress
+            const percent = Math.floor(35 + (downloaded / toDownload.length) * 12);
+            this.emitProgress(`Downloading libraries... (${downloaded}/${toDownload.length})`, percent);
+        }
+
+        logger.info('Libraries', `Libraries complete: ${downloaded}/${toDownload.length}`);
     }
 
     async downloadAssets(assetIndex) {
