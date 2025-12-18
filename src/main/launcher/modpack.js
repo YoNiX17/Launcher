@@ -2,10 +2,28 @@ const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const https = require('https');
 const got = require('got');
 
 const MODRINTH_API = 'https://api.modrinth.com/v2';
 const USER_AGENT = 'YonixLauncher/1.0.0 (contact@yonix.fr)';
+
+// Shared HTTPS agent with keep-alive for faster downloads
+const downloadAgent = new https.Agent({
+    keepAlive: true,
+    keepAliveMsecs: 30000,
+    maxSockets: 50,
+    maxFreeSockets: 25,
+    timeout: 60000
+});
+
+// Pre-configured got instance with optimizations
+const downloadClient = got.extend({
+    agent: { https: downloadAgent },
+    headers: { 'User-Agent': USER_AGENT },
+    timeout: { request: 30000 },
+    retry: { limit: 2, methods: ['GET'] }
+});
 
 class ModpackManager {
     constructor() {
@@ -309,8 +327,8 @@ class ModpackManager {
         this.emitProgress(`Downloading ${modsToDownload.length} mods...`, 30);
         let downloaded = 0;
 
-        // Download in batches of 5
-        const BATCH_SIZE = 5;
+        // Download in batches of 20 (increased from 5 for better speed)
+        const BATCH_SIZE = 20;
         for (let i = 0; i < modsToDownload.length; i += BATCH_SIZE) {
             const batch = modsToDownload.slice(i, i + BATCH_SIZE);
 
@@ -318,9 +336,8 @@ class ModpackManager {
                 const modPath = path.join(this.modsDir, modInfo.fileName);
 
                 try {
-                    const response = await got.get(modInfo.url, {
-                        responseType: 'buffer',
-                        headers: { 'User-Agent': USER_AGENT }
+                    const response = await downloadClient.get(modInfo.url, {
+                        responseType: 'buffer'
                     });
 
                     fs.writeFileSync(modPath, response.body);

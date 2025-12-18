@@ -2,10 +2,27 @@ const { app } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const got = require('got');
 const AdmZip = require('adm-zip');
 const Store = require('electron-store');
 const { logger } = require('../utils/logger');
+
+// Shared HTTPS agent with keep-alive for faster bulk downloads
+const downloadAgent = new https.Agent({
+    keepAlive: true,
+    keepAliveMsecs: 30000,
+    maxSockets: 100,        // 100 concurrent connections per host
+    maxFreeSockets: 50,
+    timeout: 60000
+});
+
+// Pre-configured got instance with optimizations
+const downloadClient = got.extend({
+    agent: { https: downloadAgent },
+    timeout: { request: 30000 },
+    retry: { limit: 2, methods: ['GET'] }
+});
 
 const store = new Store();
 
@@ -459,9 +476,11 @@ class MinecraftLauncher {
 
         logger.info('Libraries', `Downloading ${toDownload.length} libraries in parallel...`);
 
-        // Download in batches of 10
-        const BATCH_SIZE = 10;
+        const startTime = Date.now();
+        // Download in batches of 50 (increased from 10 for better speed)
+        const BATCH_SIZE = 50;
         let downloaded = 0;
+        let totalBytes = 0;
 
         for (let i = 0; i < toDownload.length; i += BATCH_SIZE) {
             const batch = toDownload.slice(i, i + BATCH_SIZE);
@@ -470,11 +489,11 @@ class MinecraftLauncher {
                 fs.mkdirSync(path.dirname(lib.fullPath), { recursive: true });
 
                 try {
-                    const response = await got.get(lib.url, {
-                        responseType: 'buffer',
-                        timeout: { request: 30000 }
+                    const response = await downloadClient.get(lib.url, {
+                        responseType: 'buffer'
                     });
                     fs.writeFileSync(lib.fullPath, response.body);
+                    totalBytes += response.body.length;
                     return true;
                 } catch (error) {
                     logger.warn('Libraries', `Failed to download: ${lib.path} - ${error.message}`);
@@ -485,12 +504,16 @@ class MinecraftLauncher {
             const results = await Promise.all(promises);
             downloaded += results.filter(r => r).length;
 
-            // Update progress
+            // Update progress with speed
+            const elapsed = (Date.now() - startTime) / 1000;
+            const speed = elapsed > 0 ? (totalBytes / 1024 / 1024 / elapsed).toFixed(1) : '0';
             const percent = Math.floor(35 + (downloaded / toDownload.length) * 12);
-            this.emitProgress(`Downloading libraries... (${downloaded}/${toDownload.length})`, percent);
+            this.emitProgress(`Downloading libraries... (${downloaded}/${toDownload.length}) - ${speed} MB/s`, percent);
         }
 
-        logger.info('Libraries', `Libraries complete: ${downloaded}/${toDownload.length}`);
+        const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+        const avgSpeed = totalTime > 0 ? (totalBytes / 1024 / 1024 / totalTime).toFixed(1) : '0';
+        logger.info('Libraries', `Libraries complete: ${downloaded}/${toDownload.length} in ${totalTime}s (${avgSpeed} MB/s)`);
     }
 
     async downloadAssets(assetIndex) {
@@ -534,8 +557,11 @@ class MinecraftLauncher {
         }
 
         console.log(`[MinecraftLauncher] Downloading ${totalMissing} missing assets (parallel)...`);
+        logger.info('Assets', `Downloading ${totalMissing} missing assets...`);
 
+        const startTime = Date.now();
         let downloaded = 0;
+        let totalBytes = 0;
         const BATCH_SIZE = 400; // Download 400 assets in parallel for max speed
 
         // Process in batches
@@ -547,11 +573,12 @@ class MinecraftLauncher {
                 const url = `https://resources.download.minecraft.net/${prefix}/${hash}`;
 
                 try {
-                    const response = await got.get(url, { responseType: 'buffer', timeout: { request: 10000 } });
+                    const response = await downloadClient.get(url, { responseType: 'buffer' });
                     fs.writeFileSync(assetPath, response.body);
+                    totalBytes += response.body.length;
                     return true;
                 } catch (error) {
-                    console.error(`[MinecraftLauncher] Failed: ${name}`, error.message);
+                    logger.warn('Assets', `Failed: ${name} - ${error.message}`);
                     return false;
                 }
             });
@@ -559,13 +586,16 @@ class MinecraftLauncher {
             const results = await Promise.all(promises);
             downloaded += results.filter(r => r).length;
 
-            // Update progress
+            // Update progress with speed
+            const elapsed = (Date.now() - startTime) / 1000;
+            const speed = elapsed > 0 ? (totalBytes / 1024 / 1024 / elapsed).toFixed(1) : '0';
             const percent = Math.floor(48 + (downloaded / totalMissing) * 20);
-            this.emitProgress(`Downloading assets... (${downloaded}/${totalMissing})`, percent);
-            console.log(`[MinecraftLauncher] Assets: ${downloaded}/${totalMissing}`);
+            this.emitProgress(`Downloading assets... (${downloaded}/${totalMissing}) - ${speed} MB/s`, percent);
         }
 
-        console.log(`[MinecraftLauncher] Assets complete: ${downloaded} downloaded`);
+        const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+        const avgSpeed = totalTime > 0 ? (totalBytes / 1024 / 1024 / totalTime).toFixed(1) : '0';
+        logger.info('Assets', `Assets complete: ${downloaded}/${totalMissing} in ${totalTime}s (${avgSpeed} MB/s)`);
     }
 
     checkRules(rules) {

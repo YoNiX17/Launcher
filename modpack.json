@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "minecraft": "1.21.1",
     "loader": "fabric",
-    "loaderVersion": "0.17.0",
+    "loaderVersion": "0.18.0",
     "description": "Modpack Yonix Survival avec mods de world gen et QoL - 92 mods",
     "shaders": [
         {
