@@ -1,0 +1,49 @@
+{
+  "invalid": [
+    "wunder-lib",
+    "blossom-lib",
+    "ferritecore",
+    "moogs-soaring-structures",
+    "moogs-end-structures",
+    "better-end-cities-vanilla-plus",
+    "betterend-crashed-ships",
+    "auto-chefs-delight",
+    "ocean-delight",
+    "simplyswords",
+    "soulslike-weaponry",
+    "mythicupgrades",
+    "advancednetherite",
+    "veinminer-enchant",
+    "entity-texture-features",
+    "skinlayers3d",
+    "ambient-sounds",
+    "inventory-hud-plus",
+    "inventorymanagement",
+    "chesttracker",
+    "attribute-fix",
+    "graves",
+    "smarter-farmers",
+    "season-hud",
+    "sawmill",
+    "fabric-tailor",
+    "simple-rpc",
+    "nether-map",
+    "developer-resources",
+    "better-end-elytra-fix"
+  ],
+  "noVersion": [
+    {
+      "id": "deeper-and-darker",
+      "title": "Deeper and Darker"
+    },
+    {
+      "id": "easter-delight",
+      "title": "Easter Delight (FROZEN)"
+    },
+    {
+      "id": "fps-display",
+      "title": "FPS-Display"
+    }
+  ],
+  "timestamp": "2025-12-19T10:15:22.676Z"
+}

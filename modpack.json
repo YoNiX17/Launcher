@@ -1,13 +1,39 @@
 {
     "name": "Yonix Survival",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "minecraft": "1.21.1",
     "loader": "fabric",
     "loaderVersion": "0.18.0",
-    "description": "Modpack Yonix Survival avec mods de world gen et QoL - 92 mods",
+    "description": "Modpack Yonix Survival v2 - 200+ mods avec world gen, structures, combat et optimisation",
     "shaders": [
         {
             "id": "bliss-shader",
+            "source": "modrinth"
+        },
+        {
+            "id": "complementary-reimagined",
+            "source": "modrinth"
+        },
+        {
+            "id": "photon-shader",
+            "source": "modrinth"
+        }
+    ],
+    "resourcepacks": [
+        {
+            "id": "fresh-animations",
+            "source": "modrinth"
+        },
+        {
+            "id": "fresh-player-animations",
+            "source": "modrinth"
+        },
+        {
+            "id": "vanilla-mashup-pbr",
+            "source": "modrinth"
+        },
+        {
+            "id": "patrix-32x",
             "source": "modrinth"
         }
     ],
@@ -17,7 +43,7 @@
             "source": "modrinth"
         },
         {
-            "id": "customskinloader",
+            "id": "continuity",
             "source": "modrinth"
         },
         {
@@ -25,39 +51,27 @@
             "source": "modrinth"
         },
         {
-            "id": "yacl",
+            "id": "architectury-api",
             "source": "modrinth"
         },
         {
-            "id": "resourceful-lib",
+            "id": "balm",
             "source": "modrinth"
         },
         {
-            "id": "forge-config-api-port",
+            "id": "bookshelf-lib",
             "source": "modrinth"
         },
         {
-            "id": "glitchcore",
+            "id": "cloth-config",
             "source": "modrinth"
         },
         {
-            "id": "fzzy-config",
+            "id": "geckolib",
             "source": "modrinth"
         },
         {
-            "id": "cristel-lib",
-            "source": "modrinth"
-        },
-        {
-            "id": "lithostitched",
-            "source": "modrinth"
-        },
-        {
-            "id": "worldweaver",
-            "source": "modrinth"
-        },
-        {
-            "id": "wunderlib",
+            "id": "moonlight",
             "source": "modrinth"
         },
         {
@@ -65,11 +79,139 @@
             "source": "modrinth"
         },
         {
-            "id": "silk",
+            "id": "puzzles-lib",
+            "source": "modrinth"
+        },
+        {
+            "id": "yungs-api",
+            "source": "modrinth"
+        },
+        {
+            "id": "forge-config-api-port",
+            "source": "modrinth"
+        },
+        {
+            "id": "cardinal-components-api",
+            "source": "modrinth"
+        },
+        {
+            "id": "terrablender",
+            "source": "modrinth"
+        },
+        {
+            "id": "bclib",
+            "source": "modrinth"
+        },
+        {
+            "id": "wunderlib",
+            "source": "modrinth"
+        },
+        {
+            "id": "iceberg",
+            "source": "modrinth"
+        },
+        {
+            "id": "necronomicon",
+            "source": "modrinth"
+        },
+        {
+            "id": "glitchcore",
+            "source": "modrinth"
+        },
+        {
+            "id": "craterlib",
+            "source": "modrinth"
+        },
+        {
+            "id": "cristel-lib",
+            "source": "modrinth"
+        },
+        {
+            "id": "cicada",
+            "source": "modrinth"
+        },
+        {
+            "id": "blossomlib",
+            "source": "modrinth"
+        },
+        {
+            "id": "fzzy-config",
             "source": "modrinth"
         },
         {
             "id": "cobweb",
+            "source": "modrinth"
+        },
+        {
+            "id": "collective",
+            "source": "modrinth"
+        },
+        {
+            "id": "silk",
+            "source": "modrinth"
+        },
+        {
+            "id": "tcdcommons",
+            "source": "modrinth"
+        },
+        {
+            "id": "txnilib",
+            "source": "modrinth"
+        },
+        {
+            "id": "resourceful-lib",
+            "source": "modrinth"
+        },
+        {
+            "id": "resourceful-config",
+            "source": "modrinth"
+        },
+        {
+            "id": "lithostitched",
+            "source": "modrinth"
+        },
+        {
+            "id": "structure-pool-api",
+            "source": "modrinth"
+        },
+        {
+            "id": "prickle",
+            "source": "modrinth"
+        },
+        {
+            "id": "yacl",
+            "source": "modrinth"
+        },
+        {
+            "id": "konkrete",
+            "source": "modrinth"
+        },
+        {
+            "id": "creativecore",
+            "source": "modrinth"
+        },
+        {
+            "id": "searchables",
+            "source": "modrinth"
+        },
+        {
+            "id": "ranged-weapon-api",
+            "source": "modrinth"
+        },
+        {
+            "id": "toadlib",
+            "source": "modrinth"
+        },
+        {
+            "id": "worldweaver",
+            "source": "modrinth"
+        },
+        {
+            "id": "data_api",
+            "source": "modrinth"
+        },
+        {
+            "id": "moogs-structure-lib",
             "source": "modrinth"
         },
         {
@@ -78,51 +220,55 @@
             "version": "0.6.9"
         },
         {
+            "id": "sodium-extra",
+            "source": "modrinth"
+        },
+        {
             "id": "lithium",
             "source": "modrinth"
         },
         {
-            "id": "iris",
+            "id": "ferrite-core",
             "source": "modrinth"
         },
         {
-            "id": "modmenu",
+            "id": "c2me-fabric",
             "source": "modrinth"
         },
         {
-            "id": "cloth-config",
+            "id": "modernfix",
             "source": "modrinth"
         },
         {
-            "id": "architectury-api",
+            "id": "immediatelyfast",
             "source": "modrinth"
         },
         {
-            "id": "geckolib",
+            "id": "distanthorizons",
             "source": "modrinth"
         },
         {
-            "id": "puzzles-lib",
+            "id": "euphoria-patches",
             "source": "modrinth"
         },
         {
-            "id": "iceberg",
+            "id": "reeses-sodium-options",
             "source": "modrinth"
         },
         {
-            "id": "prism-lib",
+            "id": "sodium-options-api",
             "source": "modrinth"
         },
         {
-            "id": "balm",
+            "id": "sodium-options-mod-compat",
             "source": "modrinth"
         },
         {
-            "id": "trinkets",
+            "id": "gputape",
             "source": "modrinth"
         },
         {
-            "id": "patchouli",
+            "id": "better-world-loading",
             "source": "modrinth"
         },
         {
@@ -134,15 +280,11 @@
             "source": "modrinth"
         },
         {
-            "id": "nullscape",
+            "id": "geophilic",
             "source": "modrinth"
         },
         {
-            "id": "amplified-nether",
-            "source": "modrinth"
-        },
-        {
-            "id": "terrablender",
+            "id": "terraphilic",
             "source": "modrinth"
         },
         {
@@ -150,7 +292,7 @@
             "source": "modrinth"
         },
         {
-            "id": "bclib",
+            "id": "amplified-nether",
             "source": "modrinth"
         },
         {
@@ -158,7 +300,23 @@
             "source": "modrinth"
         },
         {
-            "id": "yungs-api",
+            "id": "betterend",
+            "source": "modrinth"
+        },
+        {
+            "id": "nullscape",
+            "source": "modrinth"
+        },
+        {
+            "id": "deeperdarker",
+            "source": "modrinth"
+        },
+        {
+            "id": "better-end-sky",
+            "source": "modrinth"
+        },
+        {
+            "id": "grass-overhaul",
             "source": "modrinth"
         },
         {
@@ -182,11 +340,11 @@
             "source": "modrinth"
         },
         {
-            "id": "yungs-better-ocean-monuments",
+            "id": "yungs-better-nether-fortresses",
             "source": "modrinth"
         },
         {
-            "id": "yungs-better-nether-fortresses",
+            "id": "yungs-better-ocean-monuments",
             "source": "modrinth"
         },
         {
@@ -206,19 +364,7 @@
             "source": "modrinth"
         },
         {
-            "id": "ct-overhaul-village",
-            "source": "modrinth"
-        },
-        {
-            "id": "structory",
-            "source": "modrinth"
-        },
-        {
-            "id": "structory-towers",
-            "source": "modrinth"
-        },
-        {
-            "id": "towns-and-towers",
+            "id": "dungeons-and-taverns",
             "source": "modrinth"
         },
         {
@@ -230,11 +376,15 @@
             "source": "modrinth"
         },
         {
-            "id": "dungeons-and-taverns",
+            "id": "structory",
             "source": "modrinth"
         },
         {
-            "id": "philips-ruins",
+            "id": "structory-towers",
+            "source": "modrinth"
+        },
+        {
+            "id": "medieval-buildings",
             "source": "modrinth"
         },
         {
@@ -246,7 +396,15 @@
             "source": "modrinth"
         },
         {
-            "id": "moogs-structure-lib",
+            "id": "lukis-grand-capitals",
+            "source": "modrinth"
+        },
+        {
+            "id": "philips-ruins",
+            "source": "modrinth"
+        },
+        {
+            "id": "hopo-better-ruined-portals",
             "source": "modrinth"
         },
         {
@@ -254,19 +412,55 @@
             "source": "modrinth"
         },
         {
-            "id": "better-end-cities-base",
-            "source": "modrinth"
-        },
-        {
-            "id": "ati-structures-fabricforge",
-            "source": "modrinth"
-        },
-        {
-            "id": "trek",
-            "source": "modrinth"
-        },
-        {
             "id": "villages-and-pillages",
+            "source": "modrinth"
+        },
+        {
+            "id": "village-taverns",
+            "source": "modrinth"
+        },
+        {
+            "id": "formations-overworld",
+            "source": "modrinth"
+        },
+        {
+            "id": "formations-nether",
+            "source": "modrinth"
+        },
+        {
+            "id": "formations",
+            "source": "modrinth"
+        },
+        {
+            "id": "underground-worlds",
+            "source": "modrinth"
+        },
+        {
+            "id": "adorabuild-structures",
+            "source": "modrinth"
+        },
+        {
+            "id": "better-end-cities-for-betterend",
+            "source": "modrinth"
+        },
+        {
+            "id": "betterend-crashed-ships-tweaks",
+            "source": "modrinth"
+        },
+        {
+            "id": "true-ending",
+            "source": "modrinth"
+        },
+        {
+            "id": "ati-structures-vanilla-edition",
+            "source": "modrinth"
+        },
+        {
+            "id": "towns-and-towers",
+            "source": "modrinth"
+        },
+        {
+            "id": "immersive-structures",
             "source": "modrinth"
         },
         {
@@ -278,7 +472,63 @@
             "source": "modrinth"
         },
         {
+            "id": "autochefs-delight",
+            "source": "modrinth"
+        },
+        {
+            "id": "crate-delight",
+            "source": "modrinth"
+        },
+        {
+            "id": "easters-delight",
+            "source": "modrinth"
+        },
+        {
+            "id": "ends-delight",
+            "source": "modrinth"
+        },
+        {
+            "id": "oceans-delight",
+            "source": "modrinth"
+        },
+        {
+            "id": "more-delight",
+            "source": "modrinth"
+        },
+        {
+            "id": "floras-delight",
+            "source": "modrinth"
+        },
+        {
+            "id": "farmers-knives",
+            "source": "modrinth"
+        },
+        {
+            "id": "farmers-cutting-natures-spirit",
+            "source": "modrinth"
+        },
+        {
+            "id": "farmers-cutting-betternether",
+            "source": "modrinth"
+        },
+        {
+            "id": "farmers-cutting-betterend",
+            "source": "modrinth"
+        },
+        {
+            "id": "lets-do-wildernature",
+            "source": "modrinth"
+        },
+        {
             "id": "simply-swords",
+            "source": "modrinth"
+        },
+        {
+            "id": "mariums-soulslike-weaponry",
+            "source": "modrinth"
+        },
+        {
+            "id": "mythic-upgrades",
             "source": "modrinth"
         },
         {
@@ -286,19 +536,143 @@
             "source": "modrinth"
         },
         {
+            "id": "mythic-upgrades-x-advanced-netherite",
+            "source": "modrinth"
+        },
+        {
             "id": "immersive-armors",
             "source": "modrinth"
         },
         {
-            "id": "abridged",
+            "id": "blossom-blade",
             "source": "modrinth"
         },
         {
-            "id": "another-furniture",
+            "id": "veinminer",
+            "source": "modrinth"
+        },
+        {
+            "id": "veinminer-enchantment",
+            "source": "modrinth"
+        },
+        {
+            "id": "trinkets",
+            "source": "modrinth"
+        },
+        {
+            "id": "inventory-totem",
+            "source": "modrinth"
+        },
+        {
+            "id": "bosses-of-mass-destruction",
+            "source": "modrinth"
+        },
+        {
+            "id": "immersive-aircraft",
+            "source": "modrinth"
+        },
+        {
+            "id": "small-ships",
+            "source": "modrinth"
+        },
+        {
+            "id": "travelersbackpack",
             "source": "modrinth"
         },
         {
             "id": "waystones",
+            "source": "modrinth"
+        },
+        {
+            "id": "do-a-barrel-roll",
+            "source": "modrinth"
+        },
+        {
+            "id": "easy-elytra-takeoff",
+            "source": "modrinth"
+        },
+        {
+            "id": "trek",
+            "source": "modrinth"
+        },
+        {
+            "id": "iris",
+            "source": "modrinth"
+        },
+        {
+            "id": "entity-model-features",
+            "source": "modrinth"
+        },
+        {
+            "id": "entitytexturefeatures",
+            "source": "modrinth"
+        },
+        {
+            "id": "3dskinlayers",
+            "source": "modrinth"
+        },
+        {
+            "id": "eating-animation",
+            "source": "modrinth"
+        },
+        {
+            "id": "not-enough-animations",
+            "source": "modrinth"
+        },
+        {
+            "id": "better-animations-collection",
+            "source": "modrinth"
+        },
+        {
+            "id": "explosive-enhancement",
+            "source": "modrinth"
+        },
+        {
+            "id": "legendary-tooltips",
+            "source": "modrinth"
+        },
+        {
+            "id": "prism-lib",
+            "source": "modrinth"
+        },
+        {
+            "id": "advancement-plaques",
+            "source": "modrinth"
+        },
+        {
+            "id": "creeper-overhaul",
+            "source": "modrinth"
+        },
+        {
+            "id": "ambientsounds",
+            "source": "modrinth"
+        },
+        {
+            "id": "better-mount-hud",
+            "source": "modrinth"
+        },
+        {
+            "id": "melody",
+            "source": "modrinth"
+        },
+        {
+            "id": "jade",
+            "source": "modrinth"
+        },
+        {
+            "id": "jei",
+            "source": "modrinth"
+        },
+        {
+            "id": "appleskin",
+            "source": "modrinth"
+        },
+        {
+            "id": "better-stats",
+            "source": "modrinth"
+        },
+        {
+            "id": "shulkerboxtooltip",
             "source": "modrinth"
         },
         {
@@ -310,31 +684,111 @@
             "source": "modrinth"
         },
         {
-            "id": "distanthorizons",
-            "source": "modrinth"
-        },
-        {
             "id": "better-nether-map",
             "source": "modrinth"
         },
         {
-            "id": "3dskinlayers",
+            "id": "netherportalfix",
             "source": "modrinth"
         },
         {
-            "id": "not-enough-animations",
+            "id": "double-doors",
             "source": "modrinth"
         },
         {
-            "id": "betterf3",
+            "id": "dismount-entity",
             "source": "modrinth"
         },
         {
-            "id": "legendary-tooltips",
+            "id": "controlling",
+            "source": "modrinth"
+        },
+        {
+            "id": "just-zoom",
+            "source": "modrinth"
+        },
+        {
+            "id": "modmenu",
+            "source": "modrinth"
+        },
+        {
+            "id": "inventoryhudplus",
+            "source": "modrinth"
+        },
+        {
+            "id": "inventory-management",
+            "source": "modrinth"
+        },
+        {
+            "id": "chest-tracker",
+            "source": "modrinth"
+        },
+        {
+            "id": "better-advancements",
+            "source": "modrinth"
+        },
+        {
+            "id": "fpsdisplay",
+            "source": "modrinth"
+        },
+        {
+            "id": "carry-on",
+            "source": "modrinth"
+        },
+        {
+            "id": "attributefix",
+            "source": "modrinth"
+        },
+        {
+            "id": "universal-graves",
+            "source": "modrinth"
+        },
+        {
+            "id": "respawnable-pets",
+            "source": "modrinth"
+        },
+        {
+            "id": "healing-campfire",
             "source": "modrinth"
         },
         {
             "id": "comforts",
+            "source": "modrinth"
+        },
+        {
+            "id": "voidtotem",
+            "source": "modrinth"
+        },
+        {
+            "id": "tree-harvester",
+            "source": "modrinth"
+        },
+        {
+            "id": "harvest-with-ease",
+            "source": "modrinth"
+        },
+        {
+            "id": "smarter-farmers-farmers-replant",
+            "source": "modrinth"
+        },
+        {
+            "id": "craft-saddle",
+            "source": "modrinth"
+        },
+        {
+            "id": "ping-wheel",
+            "source": "modrinth"
+        },
+        {
+            "id": "status-effect-bars",
+            "source": "modrinth"
+        },
+        {
+            "id": "seasonhud-fabric",
+            "source": "modrinth"
+        },
+        {
+            "id": "uranus",
             "source": "modrinth"
         },
         {
@@ -346,31 +800,51 @@
             "source": "modrinth"
         },
         {
-            "id": "deeperdarker",
+            "id": "galosphere",
             "source": "modrinth"
         },
         {
-            "id": "lets-do-wildernature",
+            "id": "galosphere-trimming",
             "source": "modrinth"
         },
         {
-            "id": "serene-seasons",
+            "id": "better-babies",
             "source": "modrinth"
         },
         {
-            "id": "universal-graves",
+            "id": "nice-villagers-remastered",
             "source": "modrinth"
         },
         {
-            "id": "diggus-maximus",
+            "id": "nether-depths-upgrade",
             "source": "modrinth"
         },
         {
-            "id": "voidtotem",
+            "id": "hybrid-aquatic",
             "source": "modrinth"
         },
         {
-            "id": "harvest-with-ease",
+            "id": "another-furniture",
+            "source": "modrinth"
+        },
+        {
+            "id": "armor-statues",
+            "source": "modrinth"
+        },
+        {
+            "id": "universal-sawmill",
+            "source": "modrinth"
+        },
+        {
+            "id": "abridged",
+            "source": "modrinth"
+        },
+        {
+            "id": "enchanting-infuser",
+            "source": "modrinth"
+        },
+        {
+            "id": "nether-chested",
             "source": "modrinth"
         },
         {
@@ -378,11 +852,51 @@
             "source": "modrinth"
         },
         {
-            "id": "chunky",
+            "id": "serene-seasons",
+            "source": "modrinth"
+        },
+        {
+            "id": "open-parties-and-claims",
             "source": "modrinth"
         },
         {
             "id": "universal-shops",
+            "source": "modrinth"
+        },
+        {
+            "id": "fabrictailor",
+            "source": "modrinth"
+        },
+        {
+            "id": "simple-discord-rpc",
+            "source": "modrinth"
+        },
+        {
+            "id": "resourcify",
+            "source": "modrinth"
+        },
+        {
+            "id": "crash-assistant",
+            "source": "modrinth"
+        },
+        {
+            "id": "chunky",
+            "source": "modrinth"
+        },
+        {
+            "id": "pack-analytics",
+            "source": "modrinth"
+        },
+        {
+            "id": "betterend-elytra-fix",
+            "source": "modrinth"
+        },
+        {
+            "id": "fancymenu",
+            "source": "modrinth"
+        },
+        {
+            "id": "village-spawn-point",
             "source": "modrinth"
         }
     ]
